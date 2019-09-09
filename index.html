@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Marker Animations</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+
+      // The following example creates a marker in Stockholm, Sweden using a DROP
+      // animation. Clicking on the marker will toggle the animation between a BOUNCE
+      // animation and no animation.
+
+      var marker;
+
+      function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 2,
+          center: {lat: 59.325, lng: 18.070}
+        });
+
+        var markers = [{
+          title: 'Title 1',
+          url: 'url 1',
+          body: 'body 1',
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP,
+          position: {lat: 59.327, lng: 18.067}
+        }, {
+          title: 'Title 2',
+          url: 'url 2',
+          body: 'body 2',
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP,
+          position: {lat: 29.327, lng: 18.067}
+        }, {
+          title: 'Title 3',
+          url: 'url 3',
+          body: 'body 3',
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP,
+          position: {lat: 29.327, lng: 5.067}
+        }, {
+          title: 'Title 4',
+          url: 'url 4',
+          body: 'body 4',
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP,
+          position: {lat: 19.327, lng: 18.067}
+        }, {
+          title: 'Title 5',
+          url: 'url 5',
+          body: 'body 5',
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP,
+          position: {lat: 0.327, lng: 40.067}
+        }];
+
+        var markerIndex = 0;
+
+        var interval = setInterval((function(markers, markerIndex) {
+          return function() {
+            if (markerIndex > markers.length) { return; }
+            if (! markers[markerIndex]) { return; }
+            var marker = {
+              map: markers[markerIndex].map,
+              animation: markers[markerIndex].animation,
+              position: markers[markerIndex].position
+            };
+            var info = new google.maps.InfoWindow({
+              content: '<div><h2><a href="' + markers[markerIndex].url + '" target="_blank">' + markers[markerIndex].title + '</a></h2><p>' + markers[markerIndex].body + '</p><div>'
+            });
+            markers[markerIndex] = new google.maps.Marker(marker);
+            markers[markerIndex].addListener('click', (function(info, map, marker) {
+              return function() {
+                info.open(map, marker)
+              };
+            })(info, map, markers[markerIndex]));
+            markerIndex++;
+          };
+        })(markers, markerIndex), 2000);
+      }
+
+      function toggleBounce() {
+        if (marker.getAnimation() !== null) {
+          marker.setAnimation(null);
+        } else {
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+        }
+      }
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIV3qqPB5gLLGc21eWXyRbugB_MLH9Azs&callback=initMap">
+    </script>
+  </body>
+</html>

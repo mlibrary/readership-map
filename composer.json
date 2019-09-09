@@ -1,0 +1,14 @@
+{
+    "name": "lib.umich.edu/maps",
+    "type": "project",
+    "license": "BSD-Revised",
+    "authors": [
+        {
+            "name": "Albert Bertram",
+            "email": "bertrama@umich.edu"
+        }
+    ],
+    "require": {
+        "google/apiclient": "^2.0"
+    }
+}
