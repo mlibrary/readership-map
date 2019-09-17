@@ -30,7 +30,7 @@ function initMap() {
 
   function fetchPins() {
     if (pins.length > 60) { return; }
-    $.getJSON('pins.json', dataFunction);
+    $.getJSON('pins.json?cb=' + Date.now(), dataFunction);
   }
 
   function infoContent(pin) {
