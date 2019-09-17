@@ -63,22 +63,39 @@ function initMap() {
     return marker;
   }
 
+  function rollDropCount() {
+    var roll = Math.random();
+    if (roll < 0.70) {
+      return 1;
+    }
+    else if (roll < 0.90) {
+      return 2;
+    }
+    else {
+      return 3;
+    }
+  }
+
   function dropPins() {
     if (pins.length == 0) { return; }
-    var pin = pins.shift();
-    var marker = createMarker(pin);
+    var dropCount = Math.min(pins.length, rollDropCount());
+    for (var i=0; i < dropCount; ++i) {
+      var pin = pins.shift();
+      var marker = createMarker(pin);
+      markers.push(marker);
+    }
     var total = numeral($('#total-content-requests').text()).value();
     var annual = numeral($('#annual-content-requests').text()).value();
 
-    $('#total-content-requests').text(numeral(total + 1).format('0,0'));
-    $('#annual-content-requests').text(numeral(annual + 1).format('0,0'));
-    markers.push(marker);
+    $('#total-content-requests').text(numeral(total + dropCount).format('0,0'));
+    $('#annual-content-requests').text(numeral(annual + dropCount).format('0,0'));
   }
 
   function pullPins() {
-    if (markers.length <= minPins) { return; }
-    var marker = markers.shift();
-    marker.setMap(null);
+    while (markers.length > minPins) {
+      var marker = markers.shift();
+      marker.setMap(null);
+    }
   }
 
   function fisherYatesShuffle(list) {
