@@ -11,14 +11,44 @@
         height: calc(100% - 4.5em);
       }
       /* Optional: Makes the sample page fill the window. */
-      html, body {
+      
+      * {
+        -webkit-font-smoothing: antialiased;
+        box-sizing: border-box;
+      }
+
+      html, body, article, div, p, h2 {
         font-family: 'Muli', sans-serif;
-        font-color: #212B36;
+        color: #212B36; /* Neutral-400 */
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      html, body {
         height: 100%;
         margin: 0;
         padding: 0;
       }
 
+      a {
+        color: #1E80A2; /* Teal-400 */
+      }
+
+      a:hover {
+        color: #106684; /* Teal-500 */
+      }
+
+      .title, .author {
+        font-size: 15px;
+      }
+
+      .m-type-size-S {
+        font-size: 1.25rem;
+        font-weight: 600;
+        line-height: 1.25;
+        margin-bottom: .25em;
+      }
+    
       .stats {
         height: 3em;
       }
