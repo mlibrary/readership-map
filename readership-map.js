@@ -7,8 +7,7 @@ function initMap() {
   var minPins = 30;
   var mapElement = document.getElementById(mapId);
   var map = new google.maps.Map(mapElement, mapConfig);
-  //var infoTemplate = '<article><h2><a href="$pin.url" target="_blank">$pin.title</a></h2><p>$pin.body</p></article>';
-  var infoTemplate = '<article><h2>Reader from $pin.location</h2><p><div class="title"><a href="$pin.url" target="_blank">$pin.title</a></div><div>$pin.author</div></p></article>';
+  var infoTemplate = '<article><h2>Reader from $pin.location</h2><p><div class="title"><a href="$pin.url" target="_blank">$pin.title</a></div><div class="author">$pin.author</div></p></article>';
   var lastInfoWindow = null;
 
   function dataFunction(data) {
@@ -29,7 +28,7 @@ function initMap() {
   }
 
   function fetchPins() {
-    if (pins.length > 60) { return; }
+    if (pins.length > 180) { return; }
     $.getJSON('pins.json?cb=' + Date.now(), dataFunction);
   }
 
