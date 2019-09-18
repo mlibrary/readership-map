@@ -37,6 +37,9 @@ function scrape($url) {
       $ret[] = '';
     }
   }
+  if (strpos($ret[2], 'doi:') === 0) {
+    $ret[2] = 'https://doi.org/' . substr($ret[2], 4, strlen($ret[2]));
+  }
   return $urls[$url] = $ret;
 }
 
@@ -52,9 +55,8 @@ $pins = [];
 $accounts = $analytics->management_accounts->listManagementAccounts();
 $geo_map = [];
 $pageviews = [ 'total' => 0, 'annual' => 0 ];
-$views = [
+$max_results = 1000;
 
-];
 
 function query_pageviews($analytics, $view_id) {
   global $pageviews;
@@ -63,7 +65,8 @@ function query_pageviews($analytics, $view_id) {
     'ga:' . $view_id,
     '365daysAgo',
     'today',
-    'ga:pageviews'
+    'ga:pageviews',
+    ['filters' => 'ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])']
   );
   $rows = $results->getRows();
   if ($rows) {
@@ -74,7 +77,8 @@ function query_pageviews($analytics, $view_id) {
     'ga:' . $view_id,
     '2005-01-01',
     'today',
-    'ga:pageviews'
+    'ga:pageviews',
+    ['filters' => 'ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])']
   );
   $rows = $results->getRows();
   if ($rows) {
@@ -86,9 +90,9 @@ function populate_geo_map($analytics, $view_id, $start_index = 1) {
   global $geo_map;
   $geo_results = $analytics->data_ga->get(
     'ga:' . $view_id,
-    'yesterday',
+    '3daysAgo',
     'today',
-    'ga:sessions',
+    'ga:pageviews',
     [
       'dimensions' => 'ga:city,ga:region,ga:country,ga:latitude,ga:longitude',
       'start-index' => $start_index,
@@ -106,6 +110,78 @@ function populate_geo_map($analytics, $view_id, $start_index = 1) {
   if ($geo_results->getTotalResults() > $start_index && $start_index < 5000) {
     populate_geo_map($analytics, $view_id, $start_index);
   }
+}
+
+function query_events($analytics, $view_id) {
+  global $max_results, $pageviews, $pins;
+
+  $events = $analytics->data_ga->get(
+    'ga:' . $view_id,
+    '2005-01-01',
+    'today',
+    'ga:totalEvents',
+    [ 'filters' => 'ga:eventAction=~download_' ]
+  );
+  $rows = $events->getRows();
+  if (!empty($rows)) {
+    $pageviews['total'] += $rows[0][0];
+  }
+
+  $events = $analytics->data_ga->get(
+    'ga:' . $view_id,
+    '365daysAgo',
+    'today',
+    'ga:totalEvents',
+    [ 'filters' => 'ga:eventAction=~download_' ]
+  );
+  $rows = $events->getRows();
+  if (!empty($rows)) {
+    $pageviews['annual'] += $rows[0][0];
+  }
+
+  $events = $analytics->data_ga->get(
+    'ga:' . $view_id,
+    'yesterday',
+    'today',
+    'ga:totalEvents',
+    [
+      'dimensions' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:eventLabel',
+      'max-results' => $max_results,
+      'filters' => 'ga:eventAction=~download_',
+    ]
+  );
+  $rows = $events->getRows();
+  fwrite(STDERR, "      Events: " . count($rows) . " / " . $events->getTotalResults() . "\n");
+  foreach ((array) $rows as $row) {
+    list($date, $hostname, $path, $city, $region, $country, $url, $sessions) = $row;
+    if (empty($geo_map["$city//$region//$country"])) { continue; }
+    $position = $geo_map["$city//$region//$country"];
+
+    $location = format_location($city, $region, $country);
+    if (empty($location)) { continue; }
+
+    list($citation_title, $citation_author, $citation_url) = scrape($url);
+    if ($citation_url && $citation_title && $citation_author) {
+      $pins[] = [
+        'date' => $date,
+        'title' => $citation_title,
+        'url' => $citation_url,
+        'author' => $citation_author,
+        'location' => $location,
+        'position' => $position,
+      ];
+    }
+  }
+}
+
+function format_location($city, $region, $country) {
+  return join(
+    array_filter(
+      array_unique([$city, $region, $country]),
+      function ($var) { return !empty($var) && $var != '(not set)'; }
+    ),
+    ', '
+  );
 }
 
 foreach ($accounts->getItems() as $account) {
@@ -127,9 +203,10 @@ foreach ($accounts->getItems() as $account) {
         continue;
       }
 
-      query_pageviews($analytics, $view_id);
       populate_geo_map($analytics, $view_id);
       fwrite(STDERR, "      GeoMap: " . count($geo_map) . "\n");
+      query_pageviews($analytics, $view_id);
+      query_events($analytics, $view_id);
 
       $results = $analytics->data_ga->get(
         'ga:' . $view_id,
@@ -138,34 +215,25 @@ foreach ($accounts->getItems() as $account) {
         'ga:pageviews',
         [
           'dimensions' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:pageTitle',
-          'max-results' => 50,
+          'max-results' => $max_results,
+          'filters' => 'ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])',
         ]
       );
       $rows = $results->getRows();
-      $merged_rows = [];
        
-      fwrite(STDERR, "      Rows: " . count($rows) . " / " . $results->getTotalResults() . "\n");
+      fwrite(STDERR, "      Pageviews: " . count($rows) . " / " . $results->getTotalResults() . "\n");
       foreach ((array)$rows as $row) {
         list($date, $hostname, $path, $city, $region, $country, $title, $sessions) = $row;
         if (empty($geo_map["$city//$region//$country"])) { continue; }
         $position = $geo_map["$city//$region//$country"];
 
-        $location = join(
-          array_filter(
-            array_unique([$city, $region, $country]),
-            function ($var) { return !empty($var) && $var != '(not set)'; }
-          ),
-          ', '
-        );
+        $location = format_location($city, $region, $country);
         if (empty($location)) { continue; }
 
         $url = "https://{$hostname}{$path}";
         list($citation_title, $citation_author, $citation_url) = scrape($url);
 
         if ($citation_url && $citation_title && $citation_author) {
-          if (strpos($citation_url, 'doi:') === 0) {
-            $citation_url = 'https://doi.org/' . substr($citation_url, 4, strlen($citation_url));
-          }
           $pins[] = [
             'date' => $date,
             'title' => $citation_title,
