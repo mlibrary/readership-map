@@ -1,0 +1,48 @@
+---
+mapConfig:
+  zoom: 2
+  center:
+    lat: 59.325
+    lng: 18.070
+
+# minPins: How many pins to leave on the map when pulling up pins.
+minPins: 30
+
+# Fetching new pins (and content request counts) in ms.
+fetchPinInterval: 60000
+# Only fetch pins if we have fewer than this many.
+fetchPinLevel: 180
+
+# How often to drop one or more pins.
+dropPinInterval: 1000
+
+# How often to pick up one pin.
+pullPinInterval: 1000
+
+# This appears in the info bubble when a pin is clicked.
+infoTemplate: >-
+  <article>
+    <h2 class="m-type-size-S">Reader from $pin.location</h2>
+    <p>
+      <div class="title"><a href="$pin.url" target="_blank">$pin.title</a></div>
+      <div class="author">$pin.author</div>
+    </p>
+  </article>
+
+# The probibility density for dropping more than one pin at a time.
+pinDistribution:
+  - weight: 0.70
+    count: 1
+  - weight: 0.20
+    count: 2
+  - weight: 0.10
+    count: 3
+
+# The list of views to gather pageviews and events from.
+views:
+  - id: 133129661
+    metrics: ga:pageviews
+    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 133129661
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~download_

@@ -39,6 +39,10 @@ function scrape($url) {
   }
   if (strpos($ret[2], 'doi:') === 0) {
     $ret[2] = 'https://doi.org/' . substr($ret[2], 4, strlen($ret[2]));
+  } elseif (strpos($ret[2], '10.') === 0) {
+    $ret[2] = 'https://doi.org/' . $ret[2];
+  } elseif (strpos($ret[2], '2027') === 0) {
+    $ret[2] = 'https://hdl.handle.net/' . $ret[2];
   }
   return $urls[$url] = $ret;
 }
@@ -48,6 +52,8 @@ $client->useApplicationDefaultCredentials();
 $client->setApplicationName('Michigan Publishing Readership Map');
 $client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
 $analytics = new Google_Service_Analytics($client);
+
+$config = Symfony\Component\Yaml\Yaml::parsefile('config.yml');
 
 // From https://developers.google.com/analytics/devguides/reporting/core/v3/quickstart/service-php
 // https://ga-dev-tools.appspot.com/dimensions-metrics-explorer/
@@ -59,7 +65,7 @@ $max_results = 1000;
 
 
 function query_pageviews($analytics, $view_id) {
-  global $pageviews;
+  global $pageviews, $pins, $geo_map, $max_results;
 
   $results = $analytics->data_ga->get(
     'ga:' . $view_id,
@@ -84,6 +90,43 @@ function query_pageviews($analytics, $view_id) {
   if ($rows) {
     $pageviews['total'] += $rows[0][0];
   }
+
+  $results = $analytics->data_ga->get(
+    'ga:' . $view_id,
+    'yesterday',
+    'today',
+    'ga:pageviews',
+    [
+      'dimensions' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:pageTitle',
+      'max-results' => $max_results,
+      'filters' => 'ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])',
+    ]
+  );
+  $rows = $results->getRows();
+
+  fwrite(STDERR, "      Pageviews: " . count($rows) . " / " . $results->getTotalResults() . "\n");
+  foreach ((array)$rows as $row) {
+    list($date, $hostname, $path, $city, $region, $country, $title, $sessions) = $row;
+    if (empty($geo_map["$city//$region//$country"])) { continue; }
+    $position = $geo_map["$city//$region//$country"];
+
+    $location = format_location($city, $region, $country);
+    if (empty($location)) { continue; }
+
+    $url = "https://{$hostname}{$path}";
+    list($citation_title, $citation_author, $citation_url) = scrape($url);
+
+    if ($citation_url && $citation_title && $citation_author) {
+      $pins[] = [
+        'date' => $date,
+        'title' => $citation_title,
+        'url' => $citation_url,
+        'author' => $citation_author,
+        'location' => $location,
+        'position' => $position,
+      ];
+    }
+  }
 }
 
 function populate_geo_map($analytics, $view_id, $start_index = 1) {
@@ -98,7 +141,7 @@ function populate_geo_map($analytics, $view_id, $start_index = 1) {
       'start-index' => $start_index,
     ]
   );
-  
+
   foreach ((array)$geo_results->getRows() as $row) {
     list($city, $region, $country, $lat, $lng) = $row;
     if ($lat == '0.000' && $lng == '0.000') {
@@ -208,42 +251,6 @@ foreach ($accounts->getItems() as $account) {
       query_pageviews($analytics, $view_id);
       query_events($analytics, $view_id);
 
-      $results = $analytics->data_ga->get(
-        'ga:' . $view_id,
-        'yesterday',
-        'today',
-        'ga:pageviews',
-        [
-          'dimensions' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:pageTitle',
-          'max-results' => $max_results,
-          'filters' => 'ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])',
-        ]
-      );
-      $rows = $results->getRows();
-       
-      fwrite(STDERR, "      Pageviews: " . count($rows) . " / " . $results->getTotalResults() . "\n");
-      foreach ((array)$rows as $row) {
-        list($date, $hostname, $path, $city, $region, $country, $title, $sessions) = $row;
-        if (empty($geo_map["$city//$region//$country"])) { continue; }
-        $position = $geo_map["$city//$region//$country"];
-
-        $location = format_location($city, $region, $country);
-        if (empty($location)) { continue; }
-
-        $url = "https://{$hostname}{$path}";
-        list($citation_title, $citation_author, $citation_url) = scrape($url);
-
-        if ($citation_url && $citation_title && $citation_author) {
-          $pins[] = [
-            'date' => $date,
-            'title' => $citation_title,
-            'url' => $citation_url,
-            'author' => $citation_author,
-            'location' => $location,
-            'position' => $position,
-          ];
-        }
-      }
     }
   }
 }

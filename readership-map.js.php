@@ -1,12 +1,17 @@
+<?php
+require_once __DIR__ . '/vendor/autoload.php';
+$config = Symfony\Component\Yaml\Yaml::parsefile('config.yml');
+
+?>
 function initMap() {
-  var mapConfig = {"zoom":2,"center":{"lat":59.325,"lng":18.07}};
-  var minPins = 30;
-  var infoTemplate = "<article>\n  <h2 class=\"m-type-size-S\">Reader from $pin.location<\/h2>\n  <p>\n    <div class=\"title\"><a href=\"$pin.url\" target=\"_blank\">$pin.title<\/a><\/div>\n    <div class=\"author\">$pin.author<\/div>\n  <\/p>\n<\/article>";
-  var fetchPinInterval = 60000;
-  var fetchPinLevel = 180;
-  var dropPinInterval = 1000;
-  var pullPinInterval = 1000;
-  var pinDistribution = [{"weight":0.7,"count":1},{"weight":0.2,"count":2},{"weight":0.1,"count":3}];
+  var mapConfig = <?php print json_encode($config['mapConfig']); ?>;
+  var minPins = <?php print json_encode($config['minPins']); ?>;
+  var infoTemplate = <?php print json_encode($config['infoTemplate']); ?>;
+  var fetchPinInterval = <?php print json_encode($config['fetchPinInterval']); ?>;
+  var fetchPinLevel = <?php print json_encode($config['fetchPinLevel']); ?>;
+  var dropPinInterval = <?php print json_encode($config['dropPinInterval']); ?>;
+  var pullPinInterval = <?php print json_encode($config['pullPinInterval']); ?>;
+  var pinDistribution = <?php print json_encode($config['pinDistribution']); ?>;
 
   var mapId = 'map';
   var mapElement = document.getElementById(mapId);
