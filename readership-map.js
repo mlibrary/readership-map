@@ -1,7 +1,7 @@
 function initMap() {
-  var mapConfig = {"zoom":2,"center":{"lat":59.325,"lng":18.07}};
+  var mapConfig = {"zoom":2,"center":{"lat":0,"lng":0}};
   var minPins = 30;
-  var infoTemplate = "<article>\n  <h2 class=\"m-type-size-S\">Reader from $pin.location<\/h2>\n  <p>\n    <div class=\"title\"><a href=\"$pin.url\" target=\"_blank\">$pin.title<\/a><\/div>\n    <div class=\"author\">$pin.author<\/div>\n  <\/p>\n<\/article>";
+  var infoTemplate = "<article>\n  <h2 class=\"m-type-size-S\">Reader from $pin.location<\/h2>\n  <p>\n    <img class=\"access\" src=\"assets\/images\/$pin.access.svg\" alt=\"$pin.access access\">\n    <span class=\"metadata\">\n      <span class=\"title\"><a href=\"$pin.url\" target=\"_blank\">$pin.title<\/a><\/span>\n      <span class=\"author\">$pin.author<\/span>\n    <\/span>\n  <\/p>\n<\/article>";
   var fetchPinInterval = 60000;
   var fetchPinLevel = 180;
   var dropPinInterval = 1000;
@@ -13,10 +13,58 @@ function initMap() {
   var map = new google.maps.Map(mapElement, mapConfig);
   var lastInfoWindow = null;
 
+  var urlParams = parseKEV(document.location.href);
+
+  function parseKEV(str) {
+    var params = {};
+    if (!str) { return params; }
+    var urlParts = str.split('?', 2);
+    if (!urlParts || urlParts.length < 2 || ! urlParts[1]) { return params; }
+    var kev = urlParts[1].split('&');
+    if (!kev || kev.length == 0) { return params; }
+
+    $.each(kev, function(index, element) {
+      var kv = element.split('=', 2);
+      params[kv[0]] = params[kv[0]] || [];
+      params[kv[0]].push(kv[1]);
+    });
+    return params;
+  }
+
+  function filterPins(pins) {
+    if (!urlParams['filter.view'] || urlParams['filter.view'].length <= 0) {
+      return pins;
+    }
+    return $.grep(pins, function (element) {
+      return $.inArray(element.view_id, urlParams['filter.view']) != -1;
+    });
+  }
+
+  function sum(list) {
+    return list
+      .map(function(item) { return item['count']; })
+      .reduce(function (a,b) { return a + b; }, 0);
+  }
+
+  function getTextNumeral(location) {
+    return numeral($(location).text()).value();
+  }
+
+  function setTextNumeral(location, val) {
+    return $(location).text(numeral(val).format('0,0'));
+  }
+
   function dataFunction(data) {
-    $('#total-content-requests').text(numeral(data.pageviews.total).format('0,0'));
-    $('#annual-content-requests').text(numeral(data.pageviews.annual).format('0,0'));
-    $.each(data.pins, function(index, element) {
+    var filtered = filterPins(data.pins);
+    var pageviews = {
+      "total": sum(filterPins(data.pageviews.total)) - filtered.length,
+      "annual": sum(filterPins(data.pageviews.annual)) - filtered.length
+    };
+
+    setTextNumeral('#total-content-requests', pageviews.total);
+    setTextNumeral('#annual-content-requests', pageviews.annual);
+
+    $.each(filtered, function(index, element) {
       pins.push({
         title: element.title,
         url: element.url,
@@ -25,7 +73,8 @@ function initMap() {
         position: element.position,
         map: map,
         draggable: true,
-        animation: google.maps.Animation.DROP
+        animation: google.maps.Animation.DROP,
+        access: element.access
       });
     });
   }
@@ -37,10 +86,11 @@ function initMap() {
 
   function infoContent(pin) {
     return infoTemplate
-      .replace('$pin.url', pin.url)
-      .replace('$pin.title', pin.title)
-      .replace('$pin.author', pin.author)
-      .replace('$pin.location', pin.location)
+      .replace(/\$pin.url/g, pin.url)
+      .replace(/\$pin.title/g, pin.title)
+      .replace(/\$pin.author/g, pin.author)
+      .replace(/\$pin.location/g, pin.location)
+      .replace(/\$pin.access/g, pin.access)
       ;
   }
 
@@ -86,11 +136,12 @@ function initMap() {
       var marker = createMarker(pin);
       markers.push(marker);
     }
-    var total = numeral($('#total-content-requests').text()).value();
-    var annual = numeral($('#annual-content-requests').text()).value();
 
-    $('#total-content-requests').text(numeral(total + dropCount).format('0,0'));
-    $('#annual-content-requests').text(numeral(annual + dropCount).format('0,0'));
+    var total = getTextNumeral('#total-content-requests');
+    var annual = getTextNumeral('#annual-content-requests');
+
+    setTextNumeral('#total-content-requests', total + dropCount);
+    setTextNumeral('#annual-content-requests', annual + dropCount);
   }
 
   function pullPins() {

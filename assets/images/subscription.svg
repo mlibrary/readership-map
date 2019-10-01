@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   width="640"
+   height="1000">
+  <metadata>
+    <rdf:RDF
+       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <cc:Work
+         xmlns:cc="http://creativecommons.org/ns#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:creator>Jakob Voss, based on art designer at PLoS, modified by Wikipedia users Nina and Beao</dc:creator>
+        <dc:description>Closed Access logo, derived from PLoS Open Access logo. This version with transparent background.</dc:description>
+        <dc:source>http://commons.wikimedia.org/wiki/File:Closed_Access_logo_transparent.svg</dc:source>
+        <dc:license
+            rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <cc:license
+            rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <cc:attributionName>Jakob Voss, based on art designer at PLoS, modified by Wikipedia users Nina and Beao</cc:attributionName>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(-528.67833,-378.69073)">
+    <path
+       d="m 587.6826,651.09852 -2.7e-4,258.42721 104.764,0 0,-258.42721 c 0,-86.48025 70.36161,-156.8333 156.82974,-156.8333 86.46813,0 156.82523,70.35304 156.82523,156.8333 l 0,258.42721 104.7642,-2.5e-4 0,-258.42696 c 0,-144.2401 -117.35336,-261.59346 -261.58943,-261.59346 -144.23204,0 -261.59374,117.35336 -261.59374,261.59346"
+       style="fill:#848484;fill-opacity:1;fill-rule:nonzero;stroke:none" />
+    <path
+       style="fill:#848484;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       d="M 320 372.25 C 149.92326 372.25 11.53125 510.62581 11.53125 680.71875 C 11.53125 850.78735 149.92326 989.1875 320 989.1875 C 490.08084 989.1875 628.46875 850.78735 628.46875 680.71875 C 628.46875 510.6258 490.08086 372.25 320 372.25 z M 321 595.21875 C 368.73538 595.21875 407.4375 633.90475 407.4375 681.65625 C 407.4375 729.37955 368.73538 768.0625 321 768.0625 C 273.26865 768.0625 234.59375 729.37955 234.59375 681.65625 C 234.59375 633.90475 273.26865 595.21875 321 595.21875 z "
+       transform="translate(528.67833,378.69073)" />
+  </g>
+</svg>

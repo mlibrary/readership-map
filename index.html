@@ -38,8 +38,16 @@
         color: #106684; /* Teal-500 */
       }
 
+      .metadata {
+        display: inline-block;
+        width: calc(100% - 5em);
+        vertical-align: top;
+        padding-left: 0.5em;
+      }
+
       .title, .author {
         font-size: 15px;
+        display: block;
       }
 
       .m-type-size-S {
@@ -48,7 +56,12 @@
         line-height: 1.25;
         margin-bottom: .25em;
       }
-    
+
+      .access {
+        height: 2.5em;
+        display: inline-block;
+      }
+
       .stats {
         height: 3em;
       }
@@ -61,7 +74,7 @@
     </style>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script type="text/javascript" src="readership-map.js?ver=0.0.1"></script>
+    <script type="text/javascript" src="readership-map.js?ver=0.0.2"></script>
 
   </head>
   <body>

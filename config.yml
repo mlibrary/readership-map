@@ -2,8 +2,8 @@
 mapConfig:
   zoom: 2
   center:
-    lat: 59.325
-    lng: 18.070
+    lat: 0.0
+    lng: 0.0
 
 # minPins: How many pins to leave on the map when pulling up pins.
 minPins: 30
@@ -24,8 +24,11 @@ infoTemplate: >-
   <article>
     <h2 class="m-type-size-S">Reader from $pin.location</h2>
     <p>
-      <div class="title"><a href="$pin.url" target="_blank">$pin.title</a></div>
-      <div class="author">$pin.author</div>
+      <img class="access" src="assets/images/$pin.access.svg" alt="$pin.access access">
+      <span class="metadata">
+        <span class="title"><a href="$pin.url" target="_blank">$pin.title</a></span>
+        <span class="author">$pin.author</span>
+      </span>
     </p>
   </article>
 
