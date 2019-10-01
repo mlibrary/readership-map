@@ -9,7 +9,7 @@ function scrape($url) {
   }
   $html = @file_get_contents($url);
   if (empty($html)) {
-    return ['', '', ''];
+    return $urls[$url] = ['', '', '', ''];
   }
 
   $ret = [];
@@ -37,6 +37,7 @@ function scrape($url) {
       $ret[] = '';
     }
   }
+
   if (strpos($ret[2], 'doi:') === 0) {
     $ret[2] = 'https://doi.org/' . substr($ret[2], 4, strlen($ret[2]));
   } elseif (strpos($ret[2], '10.') === 0) {
@@ -44,6 +45,15 @@ function scrape($url) {
   } elseif (strpos($ret[2], '2027') === 0) {
     $ret[2] = 'https://hdl.handle.net/' . $ret[2];
   }
+
+  $content = qp($qp, "img[@alt='Open Access icon']");
+  if ($content->length > 0) {
+    $ret[] = 'open';
+  }
+  else {
+    $ret[] = 'subscription';
+  }
+
   return $urls[$url] = $ret;
 }
 
@@ -60,7 +70,7 @@ $config = Symfony\Component\Yaml\Yaml::parsefile('config.yml');
 $pins = [];
 $accounts = $analytics->management_accounts->listManagementAccounts();
 $geo_map = [];
-$pageviews = [ 'total' => 0, 'annual' => 0 ];
+$pageviews = [ 'total' => [], 'annual' => [] ];
 $max_results = 1000;
 
 
@@ -76,7 +86,7 @@ function query_pageviews($analytics, $view_id) {
   );
   $rows = $results->getRows();
   if ($rows) {
-    $pageviews['annual'] += $rows[0][0];
+    $pageviews['annual'][] = ['count' => intval($rows[0][0]), 'view_id' => $view_id];
   }
 
   $results = $analytics->data_ga->get(
@@ -88,7 +98,7 @@ function query_pageviews($analytics, $view_id) {
   );
   $rows = $results->getRows();
   if ($rows) {
-    $pageviews['total'] += $rows[0][0];
+    $pageviews['total'][] = ['count' => intval($rows[0][0]), 'view_id' => $view_id];
   }
 
   $results = $analytics->data_ga->get(
@@ -114,7 +124,7 @@ function query_pageviews($analytics, $view_id) {
     if (empty($location)) { continue; }
 
     $url = "https://{$hostname}{$path}";
-    list($citation_title, $citation_author, $citation_url) = scrape($url);
+    list($citation_title, $citation_author, $citation_url, $access) = scrape($url);
 
     if ($citation_url && $citation_title && $citation_author) {
       $pins[] = [
@@ -124,6 +134,8 @@ function query_pageviews($analytics, $view_id) {
         'author' => $citation_author,
         'location' => $location,
         'position' => $position,
+        'access' => $access,
+        'view_id' => $view_id,
       ];
     }
   }
@@ -167,7 +179,7 @@ function query_events($analytics, $view_id) {
   );
   $rows = $events->getRows();
   if (!empty($rows)) {
-    $pageviews['total'] += $rows[0][0];
+    $pageviews['total'][] = ['count' => intval($rows[0][0]), 'view_id' => $view_id];
   }
 
   $events = $analytics->data_ga->get(
@@ -179,7 +191,7 @@ function query_events($analytics, $view_id) {
   );
   $rows = $events->getRows();
   if (!empty($rows)) {
-    $pageviews['annual'] += $rows[0][0];
+    $pageviews['annual'][] = ['count' => intval($rows[0][0]), 'view_id' => $view_id];
   }
 
   $events = $analytics->data_ga->get(
@@ -203,7 +215,7 @@ function query_events($analytics, $view_id) {
     $location = format_location($city, $region, $country);
     if (empty($location)) { continue; }
 
-    list($citation_title, $citation_author, $citation_url) = scrape($url);
+    list($citation_title, $citation_author, $citation_url, $access) = scrape($url);
     if ($citation_url && $citation_title && $citation_author) {
       $pins[] = [
         'date' => $date,
@@ -212,6 +224,8 @@ function query_events($analytics, $view_id) {
         'author' => $citation_author,
         'location' => $location,
         'position' => $position,
+        'access' => $access,
+        'view_id' => $view_id,
       ];
     }
   }
@@ -254,9 +268,5 @@ foreach ($accounts->getItems() as $account) {
     }
   }
 }
-
-// Subtract out the pins from the page views so that the UI can count up and be honest.
-$pageviews['total']  -= count($pins);
-$pageviews['annual'] -= count($pins);
 
 print json_encode(['pageviews' => $pageviews, 'pins' => $pins]);
