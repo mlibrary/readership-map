@@ -42,6 +42,25 @@ pinDistribution:
     count: 3
 
 # The list of views to gather pageviews and events from.
+accounts:
+  - id: 10966839
+    metrics: ga:pageviews
+    filters: ga:pagePath=~(seq=|view=text|view=fulltext|view=pdf)
+  - id: 10966839
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~Item View
+  - id: 10966839
+    metrics: ga:totalEvents
+    filters: ga:eventCategory=~PDF Download
+  - id: 35132797
+    metrics: ga:pageviews
+    filters: ga:pagePath=~(seq=|view=text|view=fulltext|view=pdf)
+  - id: 35132797
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~Item View
+  - id: 35132797
+    metrics: ga:totalEvents
+    filters: ga:eventCategory=~PDF Download
 views:
   - id: 133129661
     metrics: ga:pageviews
