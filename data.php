@@ -2,6 +2,21 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+// From https://developers.google.com/analytics/devguides/reporting/core/v3/quickstart/service-php
+// https://ga-dev-tools.appspot.com/dimensions-metrics-explorer/
+$pins = [];
+$geo_map = [];
+$pageviews = [ 'total' => [], 'annual' => [] ];
+$max_results = 1000;
+$views_metadata = [];
+
+$client = new Google_Client();
+$client->useApplicationDefaultCredentials();
+$client->setApplicationName('Michigan Publishing Readership Map');
+$client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
+$analytics = new Google_Service_Analytics($client);
+$config = load_config('config.yml', load_accounts($analytics));
+
 function scrape($url) {
   static $urls = [];
   if (isset($urls[$url])) {
@@ -67,22 +82,52 @@ function scrape($url) {
   return $urls[$url] = $ret;
 }
 
-$client = new Google_Client();
-$client->useApplicationDefaultCredentials();
-$client->setApplicationName('Michigan Publishing Readership Map');
-$client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
-$analytics = new Google_Service_Analytics($client);
+function load_config($file, $accounts) {
+  $ret = Symfony\Component\Yaml\Yaml::parsefile($file);
+  foreach ((array) $ret['accounts'] as $account) {
+    foreach ((array) $accounts[$account['id']] as $view) {
+      $ret['views'][] = [
+        'id' => $view['id'],
+        'filters' => $account['filters'],
+        'metrics' => $account['metrics'],
+      ];
+    }
+  }
+  return $ret;
+}
 
-$config = Symfony\Component\Yaml\Yaml::parsefile('config.yml');
+function load_accounts($analytics) {
+  global $views_metadata;
 
-// From https://developers.google.com/analytics/devguides/reporting/core/v3/quickstart/service-php
-// https://ga-dev-tools.appspot.com/dimensions-metrics-explorer/
-$pins = [];
-$accounts = $analytics->management_accounts->listManagementAccounts();
-$geo_map = [];
-$pageviews = [ 'total' => [], 'annual' => [] ];
-$max_results = 1000;
-
+  $ret = [];
+  $accounts = $analytics->management_accounts->listManagementAccounts();
+  foreach ($accounts->getItems() as $account) {
+    $account_id = $account->getId();
+    $ret[$account_id] = [];
+    $account_name = $account->getName();
+    $properties = $analytics->management_webproperties->listManagementWebproperties($account_id);
+    foreach ($properties->getItems() as $property) {
+      $property_id = $property->getId();
+      $property_name = $property->getName();
+      $views = $analytics->management_profiles->listManagementProfiles($account_id, $property_id);
+      foreach ($views->getItems() as $view) {
+        $view_id = $view->getId();
+        $view_name = $view->getName();
+        $view_url  = $view->getWebsiteUrl();
+        $ret[$account_id][] = $views_metadata[$view_id] = [
+          'id' => $view_id,
+          'view_name' => $view_name,
+          'view_url' => $view_url,
+          'property_name' => $property_name,
+          'property_id' => $property_id,
+          'account_name' => $account_name,
+          'account_id' => $account_id,
+        ];
+      }
+    }
+  }
+  return $ret;
+}
 
 function populate_geo_map($analytics, $view_id, $start_index = 1) {
   global $geo_map;
@@ -187,13 +232,14 @@ function query_view_recent($id, $metrics, $filters) {
   );
 
   $rows = $results->getRows();
+  fwrite(STDERR, "  Found: " . count($rows) . "\n");
   foreach ((array)$rows as $row) {
     $row = interpret_row($dimensions, $metrics, $row);
     $position = get_position($row);
     if (empty($position)) { continue; }
     $location = get_location($row);
     if (empty($location)) { continue; }
-    $metadata = get_metadata($row);
+    $metadata = get_metadata($row, $id);
     if (empty($metadata)) { continue; }
 
     $pins[] = [
@@ -220,11 +266,20 @@ function get_location($row) {
   return format_location($row['city'], $row['region'], $row['country']);
 }
 
-function get_metadata($row) {
+function get_metadata($row, $id) {
+  global $views_metadata;
+
   if (!empty($row['eventLabel'])) {
     $url = $row['eventLabel'];
   } elseif (!empty($row['hostname']) && !empty($row['pagePath'])) {
-    $url = 'https://' . $row['hostname'] . $row['pagePath'];
+    $view_url = $views_metadata[$id]['view_url'];
+    if (strpos($view_url, $row['hostname']) === FALSE) {
+      $url = substr($view_url, strpos($view_url, '/', 9), strlen($view_url)) . $row['pagePath'];
+      fwrite(STDERR, "  Scraping: {$url} :: {$view_url} :: {$row['hostname']}\n");
+    }
+    else {
+      $url = 'https://' . $row['hostname'] . $row['pagePath'];
+    }
   } else {
     return NULL;
   }
@@ -240,8 +295,14 @@ function query_view($id, $metrics, $filters) {
 }
 
 function process_view($analytics, $view) {
-  populate_geo_map($analytics, $view['id']);
-  query_view($view['id'], $view['metrics'], $view['filters']);
+  fwrite(STDERR, "Processing view: {$view['id']}\n");
+  try {
+    populate_geo_map($analytics, $view['id']);
+    query_view($view['id'], $view['metrics'], $view['filters']);
+  }
+  catch (Exception $e) {
+    fwrite(STDERR, "  Exception caught: " . $e->getMessage() . "\n");
+  }
 }
 
 function process_views($analytics, $views) {
