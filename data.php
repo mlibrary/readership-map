@@ -17,8 +17,18 @@ $client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
 $analytics = new Google_Service_Analytics($client);
 $config = load_config('config.yml', load_accounts($analytics));
 
-function scrape($url) {
+function scrape($url = NULL) {
   static $urls = [];
+
+  if (is_null($url)) {
+    file_put_contents('urls.json', json_encode($urls));
+    return NULL;
+  }
+
+  if (empty($urls) && file_exists('urls.json')) {
+    $urls = json_decode(file_get_contents('urls.json'));
+  }
+
   if (isset($urls[$url])) {
     return $urls[$url];
   }
@@ -84,6 +94,10 @@ function scrape($url) {
 
 function load_config($file, $accounts) {
   $ret = Symfony\Component\Yaml\Yaml::parsefile($file);
+  foreach ((array) $ret['views'] as &$v) {
+    $v['id'] = (string) $v['id'];
+  }
+
   foreach ((array) $ret['accounts'] as $account) {
     foreach ((array) $accounts[$account['id']] as $view) {
       $ret['views'][] = [
@@ -269,21 +283,32 @@ function get_location($row) {
 function get_metadata($row, $id) {
   global $views_metadata;
 
+  $candidate_urls = [];
+
   if (!empty($row['eventLabel'])) {
-    $url = $row['eventLabel'];
+    $candidate_urls = [$row['eventLabel']];
   } elseif (!empty($row['hostname']) && !empty($row['pagePath'])) {
     $view_url = $views_metadata[$id]['view_url'];
     if (strpos($view_url, $row['hostname']) === FALSE) {
-      $url = substr($view_url, strpos($view_url, '/', 9), strlen($view_url)) . $row['pagePath'];
-      fwrite(STDERR, "  Scraping: {$url} :: {$view_url} :: {$row['hostname']}\n");
+      $candidate_urls[] = substr($view_url, strpos($view_url, '/', 9), strlen($view_url)) . $row['pagePath'];
     }
-    else {
-      $url = 'https://' . $row['hostname'] . $row['pagePath'];
+
+    if (strpos($row['hostname'], 'quod-lib-umich-edu') !== FALSE) {
+      $candidate_urls[] = 'https://quod.lib.umich.edu' . $row['pagePath'];
     }
+    elseif (strpos($row['hostname'], 'fulcrum-org') !== FALSE) {
+      $candidate_urls[] = 'https://www.fulcrum.org' . $row['pagePath'];
+    }
+    $candidate_urls[] = 'https://' . $row['hostname'] . $row['pagePath'];
   } else {
     return NULL;
   }
-  return scrape($url);
+
+  foreach ($candidate_urls as $url) {
+    $ret = scrape($url);
+    if ($ret) { return $ret; }
+  }
+  return NULL;
 }
 
 function query_view($id, $metrics, $filters) {
@@ -312,4 +337,12 @@ function process_views($analytics, $views) {
 }
 
 process_views($analytics, $config['views']);
+
+usort($pins, function($a, $b) {
+  if ($a['date'] == $b['date']) { return 0; }
+  return ($a['date'] < $b['date']) ? -1 : 1;
+});
+
+scrape();
+
 print json_encode(['pageviews' => $pageviews, 'pins' => $pins]);
