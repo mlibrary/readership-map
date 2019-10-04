@@ -66,7 +66,7 @@ function scrape($url) {
     $ret[] = 'open';
   }
   else {
-    $ret[] = 'subscription';
+    $ret[] = '';
   }
   if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
     return $urls[$url] = NULL;
