@@ -1,7 +1,7 @@
 function initMap() {
   var mapConfig = {"zoom":2,"center":{"lat":0,"lng":0}};
   var minPins = 30;
-  var infoTemplate = "<article>\n  <h2 class=\"m-type-size-S\">Reader from $pin.location<\/h2>\n  <p>\n    <img class=\"access\" src=\"assets\/images\/$pin.access.svg\" alt=\"$pin.access access\">\n    <span class=\"metadata\">\n      <span class=\"title\"><a href=\"$pin.url\" target=\"_blank\">$pin.title<\/a><\/span>\n      <span class=\"author\">$pin.author<\/span>\n    <\/span>\n  <\/p>\n<\/article>";
+  var infoTemplate = "<article>\n  <h2 class=\"m-type-size-S\">Reader from $pin.location<\/h2>\n  <p>\n    <img class=\"access $pin.access\" src=\"assets\/images\/$pin.access.svg\" alt=\"$pin.access access\">\n    <span class=\"metadata\">\n      <span class=\"title\"><a href=\"$pin.url\" target=\"_blank\">$pin.title<\/a><\/span>\n      <span class=\"author\">$pin.author<\/span>\n    <\/span>\n  <\/p>\n<\/article>";
   var fetchPinInterval = 60000;
   var fetchPinLevel = 180;
   var dropPinInterval = 1000;

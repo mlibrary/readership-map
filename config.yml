@@ -24,7 +24,7 @@ infoTemplate: >-
   <article>
     <h2 class="m-type-size-S">Reader from $pin.location</h2>
     <p>
-      <img class="access" src="assets/images/$pin.access.svg" alt="$pin.access access">
+      <img class="access $pin.access" src="assets/images/$pin.access.svg" alt="$pin.access access">
       <span class="metadata">
         <span class="title"><a href="$pin.url" target="_blank">$pin.title</a></span>
         <span class="author">$pin.author</span>
