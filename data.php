@@ -69,6 +69,8 @@ function scrape($url = NULL) {
     $ret[2] = 'https://doi.org/' . $ret[2];
   } elseif (strpos($ret[2], '2027') === 0) {
     $ret[2] = 'https://hdl.handle.net/' . $ret[2];
+  } else {
+    $ret[2] = $url;
   }
 
   $content = qp($qp, "img[@alt='Open Access icon']");

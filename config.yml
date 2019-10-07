@@ -43,6 +43,7 @@ pinDistribution:
 
 # The list of views to gather pageviews and events from.
 accounts:
+  #MPub quod.lib colls, part 1
   - id: 10966839
     metrics: ga:pageviews
     filters: ga:pagePath=~(seq=|view=text|view=fulltext|view=pdf)
@@ -52,6 +53,7 @@ accounts:
   - id: 10966839
     metrics: ga:totalEvents
     filters: ga:eventCategory=~PDF Download
+  #MPub quod.lib colls, part 2
   - id: 35132797
     metrics: ga:pageviews
     filters: ga:pagePath=~(seq=|view=text|view=fulltext|view=pdf)
@@ -62,6 +64,7 @@ accounts:
     metrics: ga:totalEvents
     filters: ga:eventCategory=~PDF Download
 views:
+  #Fulcrum
   - id: 133129661
     metrics: ga:pageviews
     filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
@@ -74,3 +77,17 @@ views:
   - id: 132442623
     metrics: ga:totalEvents
     filters: ga:eventAction=~download_
+  # Deep Blue Data
+  - id: 120812821
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~downloaded
+  - id: 120812821
+    metrics: ga:pageviews
+    filters: ga:pagePath=~data/downloads
+  # Deep Blue Docs
+  - id: 150701143
+    metrics: ga:pageviews
+    filters: ga:pagePath=~bitstream
+  - id: 150701143
+    metrics: ga:totalEvents
+    filters: ga:eventCategory=~Download
