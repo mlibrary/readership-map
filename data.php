@@ -26,7 +26,7 @@ function scrape($url = NULL) {
   }
 
   if (empty($urls) && file_exists('urls.json')) {
-    $urls = json_decode(file_get_contents('urls.json'));
+    $urls = json_decode(file_get_contents('urls.json'), TRUE);
   }
 
   if (isset($urls[$url])) {
@@ -127,7 +127,7 @@ function load_accounts($analytics) {
       $property_name = $property->getName();
       $views = $analytics->management_profiles->listManagementProfiles($account_id, $property_id);
       foreach ($views->getItems() as $view) {
-        $view_id = $view->getId();
+        $view_id = (string) $view->getId();
         $view_name = $view->getName();
         $view_url  = $view->getWebsiteUrl();
         $ret[$account_id][] = $views_metadata[$view_id] = [
@@ -149,7 +149,7 @@ function populate_geo_map($analytics, $view_id, $start_index = 1) {
   global $geo_map;
   $geo_results = $analytics->data_ga->get(
     'ga:' . $view_id,
-    '3daysAgo',
+    '7daysAgo',
     'today',
     'ga:pageviews',
     [
@@ -192,7 +192,7 @@ function query_view_total($id, $metrics, $filters) {
   );
   $rows = $events->getRows();
   if (!empty($rows)) {
-    $pageviews['total'][] = ['count' => intval($rows[0][0]), 'view_id' => $id];
+    $pageviews['total'][] = ['count' => intval($rows[0][0]), 'view_id' => (string) $id];
   }
 }
 
@@ -207,7 +207,7 @@ function query_view_annual($id, $metrics, $filters) {
   );
   $rows = $events->getRows();
   if (!empty($rows)) {
-    $pageviews['annual'][] = ['count' => intval($rows[0][0]), 'view_id' => $id];
+    $pageviews['annual'][] = ['count' => intval($rows[0][0]), 'view_id' => (string) $id];
   }
 }
 
@@ -228,6 +228,8 @@ function interpret_row($dimensions, $metrics, $row) {
 function query_view_recent($id, $metrics, $filters) {
   global $max_results, $analytics, $pins;
 
+  $id = (string) $id;
+
   $dimensions_map = [
     'ga:pageviews' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:pageTitle',
     'ga:totalEvents' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:eventLabel'
@@ -244,6 +246,7 @@ function query_view_recent($id, $metrics, $filters) {
       'dimensions' => $dimensions,
       'max-results' => $max_results,
       'filters' => $filters,
+      'sort' => 'ga:dateHourMinute',
     ]
   );
 
@@ -266,7 +269,7 @@ function query_view_recent($id, $metrics, $filters) {
       'location' => $location,
       'position' => $position,
       'access' => $metadata['access'],
-      'view_id' => $id,
+      'view_id' => (string) $id,
     ];
   }
 }
