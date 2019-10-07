@@ -85,6 +85,9 @@ views:
     metrics: ga:pageviews
     filters: ga:pagePath=~data/downloads
   # Deep Blue Docs
-  - id: 11111
+  - id: 150701143
     metrics: ga:pageviews
     filters: ga:pagePath=~bitstream
+  - id: 150701143
+    metrics: ga:totalEvents
+    filters: ga:eventCategory=~Download
