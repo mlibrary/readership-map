@@ -1,4 +1,10 @@
 ---
+start:
+  datefmt: Y-m-d
+  date: yesterday
+end:
+  datefmt: Y-m-d
+  date: yesterday
 mapConfig:
   zoom: 2
   center:

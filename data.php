@@ -17,6 +17,16 @@ $client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
 $analytics = new Google_Service_Analytics($client);
 $config = load_config('config.yml', load_accounts($analytics));
 
+$pin_start_date = date(
+  $config['start']['datefmt'],
+   strtotime($config['start']['date'])
+);
+
+$pin_end_date = date(
+  $config['end']['datefmt'],
+  strtotime($config['end']['date'])
+);
+
 function scrape($url = NULL) {
   static $urls = [];
 
@@ -228,7 +238,7 @@ function interpret_row($dimensions, $metrics, $row) {
 }
 
 function query_view_recent($id, $metrics, $filters) {
-  global $max_results, $analytics, $pins;
+  global $max_results, $analytics, $pins, $pin_start_date, $pin_end_date;
 
   $before = count($pins);
 
@@ -243,8 +253,8 @@ function query_view_recent($id, $metrics, $filters) {
 
   $results = $analytics->data_ga->get(
     'ga:' . $id,
-    'yesterday',
-    'today',
+    $pin_start_date,
+    $pin_end_date,
     $metrics,
     [
       'dimensions' => $dimensions,
