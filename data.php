@@ -34,6 +34,7 @@ function scrape($url = NULL) {
   }
   $html = @file_get_contents($url);
   if (empty($html)) {
+    fwrite(STDERR, "  Scrape failed: $url empty\n");
     return $urls[$url] = NULL;
   }
 
@@ -81,6 +82,7 @@ function scrape($url = NULL) {
     $ret[] = 'subscription';
   }
   if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
+    fwrite(STDERR, "  Scrape failed: $url unable to find metadata\n");
     return $urls[$url] = NULL;
   }
 
@@ -228,6 +230,8 @@ function interpret_row($dimensions, $metrics, $row) {
 function query_view_recent($id, $metrics, $filters) {
   global $max_results, $analytics, $pins;
 
+  $before = count($pins);
+
   $id = (string) $id;
 
   $dimensions_map = [
@@ -272,6 +276,7 @@ function query_view_recent($id, $metrics, $filters) {
       'view_id' => (string) $id,
     ];
   }
+  fwrite(STDERR, "  Scraped: " . (count($pins) - $before) . "\n");
 }
 
 function get_position($row) {
@@ -292,7 +297,8 @@ function get_metadata($row, $id) {
 
   if (!empty($row['eventLabel'])) {
     $candidate_urls = [$row['eventLabel']];
-  } elseif (!empty($row['hostname']) && !empty($row['pagePath'])) {
+  }
+  if (!empty($row['hostname']) && !empty($row['pagePath'])) {
     $view_url = $views_metadata[$id]['view_url'];
     if (strpos($view_url, $row['hostname']) === FALSE) {
       $candidate_urls[] = substr($view_url, strpos($view_url, '/', 9), strlen($view_url)) . $row['pagePath'];
@@ -305,11 +311,10 @@ function get_metadata($row, $id) {
       $candidate_urls[] = 'https://www.fulcrum.org' . $row['pagePath'];
     }
     $candidate_urls[] = 'https://' . $row['hostname'] . $row['pagePath'];
-  } else {
-    return NULL;
   }
 
   foreach ($candidate_urls as $url) {
+    if (strpos($url, 'http') !== 0) { continue; }
     $ret = scrape($url);
     if ($ret) { return $ret; }
   }
@@ -325,7 +330,7 @@ function query_view($id, $metrics, $filters) {
 }
 
 function process_view($analytics, $view) {
-  fwrite(STDERR, "Processing view: {$view['id']}\n");
+  fwrite(STDERR, "Processing view: {$view['id']} / {$view['metrics']}\n");
   try {
     populate_geo_map($analytics, $view['id']);
     query_view($view['id'], $view['metrics'], $view['filters']);
