@@ -31,7 +31,7 @@ Because data.php takes some time to run:
 Investigate [enhanced ecommerce for Google Analytics](https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#measure_product_detail_views).
 
 ```javascript
-gtag('event', 'add_to_cart', {
+gtag('event', 'view_item', {
   "items": [
     {
       "id": "P12345",
