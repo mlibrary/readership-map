@@ -84,6 +84,13 @@ views:
   - id: 132442623
     metrics: ga:totalEvents
     filters: ga:eventAction=~download_
+  #Fulcrum / HEB
+  - id: 22140843
+    metrics: ga:pageviews
+    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 22140843
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~download_  
   # Deep Blue Data
   - id: 120812821
     metrics: ga:totalEvents
