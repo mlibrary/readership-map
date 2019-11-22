@@ -70,13 +70,14 @@ accounts:
     metrics: ga:totalEvents
     filters: ga:eventCategory=~PDF Download
 views:
-  #Fulcrum
+  #Fulcrum (all)
   - id: 133129661
     metrics: ga:pageviews
     filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
   - id: 133129661
     metrics: ga:totalEvents
     filters: ga:eventAction=~download_
+  #Fulcrum / Michigan
   - id: 132442623
     metrics: ga:pageviews
     filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
