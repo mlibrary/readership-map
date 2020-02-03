@@ -2,3 +2,4 @@
 *.swo
 .htaccess
 vendor
+.env
