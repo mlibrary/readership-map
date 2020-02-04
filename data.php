@@ -42,6 +42,11 @@ function scrape($url = NULL) {
   if (isset($urls[$url])) {
     return $urls[$url];
   }
+
+  if (strpos($url, '/data/downloads') !== NULL) {
+    return $urls[$url] = NULL;
+  }
+
   $html = @file_get_contents($url);
   if (empty($html)) {
     fwrite(STDERR, "  Scrape failed: $url empty\n");
