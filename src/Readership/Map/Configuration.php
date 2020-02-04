@@ -10,6 +10,7 @@ class Configuration {
 
   public function __construct($yaml_file = 'config.yml') {
     $this->config = Yaml::parsefile($yaml_file);
+    $this->cleanConfig();
   }
 
   public function pinStartDate() {
@@ -52,6 +53,13 @@ class Configuration {
           'filters' => $account['filters'],
         ];
       }
+    }
+  }
+
+  private function cleanConfig() {
+    // Ensure that view id's are handled like strings.
+    foreach ((array) $this->config['views'] as $i => $view) {
+      $this->config['views'][$i]['id'] = (string) $view['id'];
     }
   }
 
