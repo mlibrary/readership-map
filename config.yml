@@ -11,6 +11,10 @@ mapConfig:
     lat: 0.0
     lng: 0.0
 
+pinIcons:
+  subscription: https://maps.google.com/mapfiles/ms/micons/red.png
+  open: https://maps.google.com/mapfiles/ms/micons/orange.png
+
 # minPins: How many pins to leave on the map when pulling up pins.
 minPins: 30
 

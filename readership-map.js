@@ -7,6 +7,7 @@ function initMap() {
   var dropPinInterval = 1000;
   var pullPinInterval = 1000;
   var pinDistribution = [{"weight":0.7,"count":1},{"weight":0.2,"count":2},{"weight":0.1,"count":3}];
+  var pinIcons = {"subscription":"https:\/\/maps.google.com\/mapfiles\/ms\/micons\/red.png","open":"https:\/\/maps.google.com\/mapfiles\/ms\/micons\/orange.png"};
 
   var mapId = 'map';
   var mapElement = document.getElementById(mapId);
@@ -74,7 +75,8 @@ function initMap() {
         map: map,
         draggable: true,
         animation: google.maps.Animation.DROP,
-        access: element.access
+        access: element.access,
+        icon: pinIcons[element.access]
       });
     });
   }
@@ -98,7 +100,8 @@ function initMap() {
     var marker = new google.maps.Marker({
       map: pin.map,
       animation: pin.animation,
-      position: pin.position
+      position: pin.position,
+      icon: pin.icon
     });
     var info = new google.maps.InfoWindow({
       content: infoContent(pin)
