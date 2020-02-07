@@ -2,15 +2,16 @@
 
 use PHPUnit\Framework\TestCase;
 use Readership\Map\Configuration;
+use Symfony\Component\Yaml\Yaml;
 
 class ConfigurationTest extends TestCase {
 
   protected function setUp() {
     $this->dataDir =  'tests/data/Readership/Map/ConfigurationTest';
     $this->config = new Configuration("{$this->dataDir}/config.yml");
-    $this->initialViews = Symfony\Component\Yaml\Yaml::parsefile("{$this->dataDir}/initialViews.yml");
-    $this->additionalViews = Symfony\Component\Yaml\Yaml::parsefile("{$this->dataDir}/additionalViews.yml");
-    $this->finalViews = Symfony\Component\Yaml\Yaml::parsefile("{$this->dataDir}/finalViews.yml");
+    $this->initialViews = Yaml::parsefile("{$this->dataDir}/initialViews.yml");
+    $this->additionalViews = Yaml::parsefile("{$this->dataDir}/additionalViews.yml");
+    $this->finalViews = Yaml::parsefile("{$this->dataDir}/finalViews.yml");
     $this->startDate = date('Y-m-d', strtotime('yesterday'));
     $this->endDate = date('Y-m-d', strtotime('yesterday'));
   }

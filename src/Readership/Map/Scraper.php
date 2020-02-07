@@ -16,7 +16,7 @@ class Scraper {
   }
 
   public function writeCache() {
-    file_put_contents('urls.json', json_encode($this->urls));
+    file_put_contents($this->cache, json_encode($this->urls));
     return $this;
   }
 
@@ -29,20 +29,22 @@ class Scraper {
   public function scrape($url) {
 
     if (is_null($url)) {
+      $this->log("  Scrape failed: $url empty\n");
       return NULL;
     }
 
     if (isset($this->urls[$url])) {
+      $this->log("  Cached results: $url empty\n");
       return $this->urls[$url];
     }
 
-    if (strpos($url, '/data/downloads') !== NULL) {
+    if (strpos($url, '/data/downloads') !== FALSE) {
       return $this->urls[$url] = NULL;
     }
 
     $html = @file_get_contents($url);
     if (empty($html)) {
-      fwrite(STDERR, "  Scrape failed: $url empty\n");
+      $this->log("  Scrape failed: $url empty\n");
       return $this->urls[$url] = NULL;
     }
 
@@ -94,8 +96,11 @@ class Scraper {
       $ret[] = 'subscription';
     }
     if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
-      fwrite(STDERR, "  Scrape failed: $url unable to find metadata\n");
-      return $this->urls[$url] = NULL;
+      $ret = $this->scrapeCoins($qp);
+      if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
+        fwrite(STDERR, "  Scrape failed: $url unable to find metadata\n");
+        return $this->urls[$url] = NULL;
+      }
     }
 
     $ret = [
@@ -106,6 +111,24 @@ class Scraper {
     ];
 
     return $this->urls[$url] = $ret;
+  }
+
+  private function scrapeCoins($qp) {
+    $content = qp($qp, "span[@class='Z3988']")->attr('title');
+    if (empty($content)) {
+      return [];
+    }
+    $pairs = [];
+    foreach (explode('&', $content) as $pair) {
+      list($key, $val) = explode('=', $pair, 2);
+      $pairs[$key] = urldecode($val);
+    }
+    return [
+      isset($pairs['rft.title']) ? $pairs['rft.title'] : NULL,
+      isset($pairs['rft.au']) ? $pairs['rft.au'] : NULL,
+      isset($pairs['rft_id']) ? $pairs['rft_id'] : NULL,
+      'open'
+    ];
   }
 
   private function log($string) {
