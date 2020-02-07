@@ -47,6 +47,10 @@ class Scraper {
       $this->log("  Scrape failed: $url empty\n");
       return $this->urls[$url] = NULL;
     }
+    return $this->urls[$url] = $this->scrapeHTML($html, $url);
+  }
+
+  public function scrapeHTML($html, $url = '') {
 
     $ret = [];
     $qp = html5qp($html);
@@ -99,7 +103,7 @@ class Scraper {
       $ret = $this->scrapeCoins($qp);
       if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
         fwrite(STDERR, "  Scrape failed: $url unable to find metadata\n");
-        return $this->urls[$url] = NULL;
+        return NULL;
       }
     }
 
@@ -110,7 +114,7 @@ class Scraper {
       'access' => $ret[3],
     ];
 
-    return $this->urls[$url] = $ret;
+    return $ret;
   }
 
   private function scrapeCoins($qp) {
