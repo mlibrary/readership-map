@@ -6,9 +6,12 @@ class GoogleClientDriver {
   private $analytics;
   private $views = [];
   private $accountInfo = [];
+  private $GoogleClientConfig = [
+    'retries' => 5,
+  ];
 
   public function __construct($name, $scopes) {
-    $this->client = new \Google_Client();
+    $this->client = new \Google_Client($this->googleClientConfig);
     $this->client->useApplicationDefaultCredentials();
     $this->client->setApplicationName($name);
     $this->client->setScopes($scopes);
