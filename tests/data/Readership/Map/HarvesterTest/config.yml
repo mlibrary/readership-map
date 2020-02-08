@@ -1,0 +1,7 @@
+---
+getViews:
+  - id: 11111
+    account_id: 22222
+    metrics: ga:pageviews
+    filters: filters
+    view_url: https://www.example.com

@@ -1,0 +1,18 @@
+---
+getGeoData:
+  - ['City1', 'Region', 'Country', 0, 0]
+  - ['City2', 'Region', 'Country', 0, 0]
+getViewTotals:
+  - [100]
+getViewAnnual:
+  - [10]
+getViewRecent:
+  -
+    - 20200202
+    - www.fulcrum.org
+    - /
+    - Ann Arbor
+    - Michigan
+    - US
+    - Fulcrum
+    - 1

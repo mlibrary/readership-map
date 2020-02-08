@@ -20,12 +20,6 @@ class Scraper {
     return $this;
   }
 
-  private function scrape_meta_tags($qp) {
-    $ret = [];
-
-    return $ret;
-  }
-
   public function scrape($url) {
 
     if (is_null($url)) {

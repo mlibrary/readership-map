@@ -1,0 +1,33 @@
+---
+getViewRecent:
+  id: ga:id
+  start: start
+  end: end
+  metrics: metrics
+  options:
+    dimensions: dimensions
+    max-results: max_results
+    filters: filters
+    sort: ga:dateHourMinute
+getViewAnnual:
+  id: ga:id
+  start: 365daysAgo
+  end: today
+  metrics: metrics
+  options:
+    filters: filters
+getViewTotals:
+  id: ga:id
+  start: '2005-01-01'
+  end: today
+  metrics: metrics
+  options:
+    filters: filters
+getGeoData:
+  id: ga:id
+  start: 7daysAgo
+  end: today
+  metrics: ga:pageviews
+  options:
+    dimensions: ga:city,ga:region,ga:country,ga:latitude,ga:longitude
+    start-index: index
