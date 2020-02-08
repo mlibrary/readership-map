@@ -1,12 +1,15 @@
 <?php
 namespace Readership\Map;
 
+/**
+ * @codeCoverageIgnore
+ */
 class GoogleClientDriver {
   private $client;
   private $analytics;
   private $views = [];
   private $accountInfo = [];
-  private $GoogleClientConfig = [
+  private $googleClientConfig = [
     'retries' => 5,
   ];
 
