@@ -2,6 +2,8 @@
 namespace Readership\Map;
 
 class Scraper {
+  use Logging;
+
   private $urls;
   private $cache;
 
@@ -96,7 +98,7 @@ class Scraper {
     if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
       $ret = $this->scrapeCoins($qp);
       if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
-        fwrite(STDERR, "  Scrape failed: $url unable to find metadata\n");
+        $this->log("  Scrape failed: $url unable to find metadata\n");
         return NULL;
       }
     }
@@ -129,7 +131,4 @@ class Scraper {
     ];
   }
 
-  private function log($string) {
-    fwrite(STDERR, $string);
-  }
 }

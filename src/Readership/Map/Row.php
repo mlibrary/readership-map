@@ -2,6 +2,8 @@
 namespace Readership\Map;
 
 class Row {
+  use Logging;
+
   private $data;
 
   public function __construct($dimensions, $metrics, $row, $scraper) {
@@ -71,11 +73,5 @@ class Row {
     return NULL;
   }
 
-  /**
-   * @codeCoverageIgnore
-   */
-  private function log($string) {
-    fwrite(STDERR, $string);
-  }
 }
 

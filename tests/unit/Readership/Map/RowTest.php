@@ -16,7 +16,7 @@ class RowTest extends TestCase {
     $this->dimensions = 'ga:city,ga:region,ga:country,ga:dateHourMinute';
     $this->metrics = 'ga:eventLabel,ga:hostname,ga:pagePath';
     $this->rowData = Yaml::parsefile("{$this->dataDir}/rowData.yml");
-    $this->row = new Row($this->dimensions, $this->metrics, $this->rowData, new Scraper());
+    $this->row = (new Row($this->dimensions, $this->metrics, $this->rowData, new Scraper()))->quiet();
     $this->geoMap = [
       'City//Region//Country' => 'Position',
     ];

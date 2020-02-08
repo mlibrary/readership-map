@@ -52,10 +52,13 @@ pinDistribution:
     count: 3
 
 accounts:
-accounts:
   - id: 2222
     metrics: ga:pageviews
     filters: ga:pagePath=~(seq=|view=text|view=fulltext|view=pdf)
+    start:
+      datefmt: Y-m-d
+      date: '2020-01-01'
+
   - id: 2222
     metrics: ga:totalEvents
     filters: ga:eventAction=~Item View
@@ -64,6 +67,9 @@ views:
   - id: 133129661
     metrics: ga:pageviews
     filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    end:
+      datefmt: Y-m-d
+      date: '2020-01-01'
   - id: 133129661
     metrics: ga:totalEvents
     filters: ga:eventAction=~download_

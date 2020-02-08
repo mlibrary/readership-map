@@ -88,7 +88,7 @@ class HarvesterTest extends TestCase {
     $this->config = new StubConfiguration($this->dataDir . '/config.yml');
     $this->account = new StubAnalyticsAccount($this->dataDir . '/account.yml');
     $this->scraper = new StubScraper($this->dataDir . '/scraper.yml');
-    $this->harvester = new Harvester($this->config, $this->account, $this->scraper);
+    $this->harvester = (new Harvester($this->config, $this->account, $this->scraper))->quiet();
     $this->emptyJSON = '{"pageviews":{"total":[],"annual":[]},"pins":[]}';
     $this->filledJSON = Yaml::parsefile($this->dataDir . '/filledJSON.yml');
   }

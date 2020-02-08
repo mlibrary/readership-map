@@ -15,8 +15,8 @@ class ScraperTest extends TestCase {
     $this->tempCache = tempnam('/tmp', 'readership-map-scraper-test-');
     $this->cacheFileContent = '{"cache":"value"}';
     file_put_contents($this->tempCache, $this->cacheFileContent);
-    $this->scraper = new Scraper($this->dataDir . "/urls.json");
-    $this->cachingScraper = new Scraper($this->tempCache);
+    $this->scraper = (new Scraper($this->dataDir . "/urls.json"))->quiet();
+    $this->cachingScraper = (new Scraper($this->tempCache))->quiet();
   }
 
   protected function tearDown() : void {

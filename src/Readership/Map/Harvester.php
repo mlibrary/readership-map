@@ -2,6 +2,8 @@
 namespace Readership\Map;
 
 class Harvester {
+  use Logging;
+
   private $config;
   private $analytics;
   private $scraper;
@@ -109,15 +111,15 @@ class Harvester {
     ][$metrics];
   }
 
-  private function queryViewRecent($id, $metrics, $filters, $view_url) {
+  private function queryViewRecent($id, $start, $end, $metrics, $filters, $view_url) {
     $before = count($this->pins);
     $id = (string) $id;
     $dimensions = $this->getDimensions($metrics);
 
     $results = $this->getViewRecent(
       $id,
-      $this->recentPinsStart,
-      $this->recentPinsEnd,
+      $start,
+      $end,
       $metrics,
       $dimensions,
       $this->recentMaxResults,
@@ -152,16 +154,15 @@ class Harvester {
     $id = $view['id'];
     $metrics = $view['metrics'];
     $filters = $view['filters'];
+    $start   = isset($view['start']) ? $view['start'] : $this->recentPinsStart;
+    $end     = isset($view['end']) ? $view['end'] : $this->recentPinsEnd;
+
     $view_url = isset($view['view_url']) ? $view['view_url'] : '';
     if (is_array($metrics)) { $metrics = implode($metrics, ','); }
     if (is_array($filters)) { $filters = implode($filters, ','); }
     $this->queryViewTotal($id, $metrics, $filters);
     $this->queryViewAnnual($id, $metrics, $filters);
-    $this->queryViewRecent($id, $metrics, $filters, $view_url);
-  }
-
-  private function log($string) {
-    fwrite(STDERR, $string);
+    $this->queryViewRecent($id, $start, $end, $metrics, $filters, $view_url);
   }
 
   private function getViews() {
