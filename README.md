@@ -1,5 +1,8 @@
 # Readership map
 
+[![Build Status Badge](https://api.travis-ci.org/mlibrary/readership-map.svg?branch=master)](https://travis-ci.org/mlibrary/readership-map)
+[![Coverage Status](https://coveralls.io/repos/github/mlibrary/readership-map/badge.svg?branch=master)](https://coveralls.io/github/mlibrary/readership-map?branch=master)
+
 ## Setup (not quite there yet for full real-time)
 
 1. git clone https://github.com/mlibrary/readership-map
