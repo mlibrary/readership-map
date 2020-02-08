@@ -3,3 +3,4 @@
 .htaccess
 vendor
 .env
+/report

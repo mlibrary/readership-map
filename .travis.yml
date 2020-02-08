@@ -5,4 +5,4 @@ php:
 install: composer install
 script: vendor/bin/phpunit
 after_success:
-  - travis_retry vendor/bin/php-coveralls -x report/clover.xml -v
+  - travis_retry vendor/bin/php-coveralls -v
