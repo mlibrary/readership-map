@@ -16,7 +16,6 @@ class Harvester {
     $this->config = $config;
     $this->analytics = $account;
     $this->scraper = $scraper;
-    $this->config->addViews($this->analytics->getViews());
     $this->pageviews = ['total' => [], 'annual' => []];
     $this->recentPinsStart = $this->config->pinStartDate();
     $this->recentPinsEnd = $this->config->pinEndDate();

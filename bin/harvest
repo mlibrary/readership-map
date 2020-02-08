@@ -5,8 +5,9 @@ namespace Readership\Map;
 require_once __DIR__ . '/../src/autoload.php';
 ini_set('log_errors_max_len', 0);
 
-$config = new Configuration();
 $account = new AnalyticsAccount();
+$config = new Configuration();
+$config->addViews($account->getViews());
 $scraper = new Scraper();
 
 $harvester = new Harvester($config, $account, $scraper);
