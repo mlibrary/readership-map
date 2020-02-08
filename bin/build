@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ -x /usr/bin/php7.3 ] ; then
+  PHP=/usr/bin/php7.3
+else
+  PHP=/usr/bin/php
+fi
+
+echo "Building readership-map.js"
+
+"$PHP" readership-map.js.php > readership-map.js
