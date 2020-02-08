@@ -4,3 +4,5 @@ php:
   - 7.3
 install: composer install
 script: vendor/bin/phpunit
+after_success:
+  - travis_retry vendor/bin/php-coveralls -x report/clover.xml -v

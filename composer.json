@@ -18,5 +18,8 @@
         "psr-4": {
           "Readership\\": "src/Readership/"
         }
+    },
+    "require-dev": {
+        "php-coveralls/php-coveralls": "^2.2"
     }
 }
