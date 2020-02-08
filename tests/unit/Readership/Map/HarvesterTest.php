@@ -14,11 +14,14 @@ class StubResults {
   }
 
   public function getRows() {
-    return $this->data;
+    return $this->data['rows'];
   }
 
   public function getTotalResults() {
-    return count($this->data);
+    if (isset($this->data['totalResults'])) {
+      return $this->data['totalResults'];
+    }
+    return count($this->data['rows']);
   }
 }
 
@@ -66,6 +69,15 @@ class StubAnalyticsAccount extends AnalyticsAccount {
 class StubScraper extends Scraper {
   public function __construct($file = '') {
     $this->data = Yaml::parsefile($file);
+  }
+
+  public function scrape($url) {
+    return [
+      'citation_title' => 'Title',
+      'citation_author' => 'Author',
+      'citation_url' => 'URL',
+      'access' => 'open',
+    ];
   }
 }
 
