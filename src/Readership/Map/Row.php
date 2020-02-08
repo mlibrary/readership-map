@@ -55,19 +55,25 @@ class Row {
       if (strpos($this->data['hostname'], 'quod-lib-umich-edu') !== FALSE) {
         $candidate_urls[] = 'https://quod.lib.umich.edu' . $this->data['pagePath'];
       }
-      elseif (strpos($this->data['hostname'], 'fulcrum-org') !== FALSE) {
+
+      if (strpos($this->data['hostname'], 'fulcrum-org') !== FALSE) {
         $candidate_urls[] = 'https://www.fulcrum.org' . $this->data['pagePath'];
       }
       $candidate_urls[] = 'https://' . $this->data['hostname'] . $this->data['pagePath'];
     }
+
     foreach ($candidate_urls as $url) {
       if (strpos($url, 'http') !== 0) { continue; }
       $ret = $this->scrape($url);
       if ($ret) { return $ret; }
     }
+
     return NULL;
   }
 
+  /**
+   * @codeCoverageIgnore
+   */
   private function log($string) {
     fwrite(STDERR, $string);
   }
