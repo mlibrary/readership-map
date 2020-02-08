@@ -5,8 +5,5 @@ namespace Readership\Map;
 require_once __DIR__ . '/../src/autoload.php';
 ini_set('log_errors_max_len', 0);
 
-$config = new Configuration();
-$account = new AnalyticsAccount();
-
 $validator = new DataValidator();
 exit($validator->validFile($argv[1]));
