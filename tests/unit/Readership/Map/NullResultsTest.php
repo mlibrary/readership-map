@@ -6,7 +6,7 @@ use Readership\Map\NullResults;
 
 class NullResultsTest extends TestCase {
 
-  protected function setUp() {
+  protected function setUp() : void {
     $this->results = new NullResults();
   }
 

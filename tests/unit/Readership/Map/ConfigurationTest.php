@@ -6,7 +6,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class ConfigurationTest extends TestCase {
 
-  protected function setUp() {
+  protected function setUp() : void {
     $this->dataDir =  'tests/data/Readership/Map/ConfigurationTest';
     $this->config = new Configuration("{$this->dataDir}/config.yml");
     $this->initialViews = Yaml::parsefile("{$this->dataDir}/initialViews.yml");

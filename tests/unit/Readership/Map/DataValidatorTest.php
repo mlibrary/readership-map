@@ -5,7 +5,7 @@ use Readership\Map\DataValidator;
 
 class DataValidatorTest extends TestCase {
 
-  protected function setUp() {
+  protected function setUp() : void {
     $this->dataDir = 'tests/data/Readership/Map/DataValidatorTest';
     $this->validator = new DataValidator();
     $this->validFile = $this->dataDir . '/validFile.json';

@@ -11,7 +11,7 @@ class Scraper {
 }
 
 class RowTest extends TestCase {
-  protected function setUp() {
+  protected function setUp() : void {
     $this->dataDir = 'tests/data/Readership/Map/RowTest';
     $this->dimensions = 'ga:city,ga:region,ga:country,ga:dateHourMinute';
     $this->metrics = 'ga:eventLabel,ga:hostname,ga:pagePath';

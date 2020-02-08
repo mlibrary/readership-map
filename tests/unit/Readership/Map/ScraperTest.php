@@ -5,7 +5,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class ScraperTest extends TestCase {
 
-  protected function setUp() {
+  protected function setUp() : void {
     $this->dataDir = 'tests/data/Readership/Map/ScraperTest';
     $this->coinsURL = 'https://quod.lib.umich.edu/d/did/did2222.0000.564/--intolerance?rgn=main;view=fulltext;q1=Denis+Diderot+ascribed+by+Jacques+Proust';
     $this->coinsHTML = file_get_contents($this->dataDir . '/scrapeCoins.html');
