@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# First figure out where we're being run from
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$(dirname "$( cd -P "$( dirname "$SOURCE" )" && pwd )")/"
+
+DRYRUN="-n"
+
+if [ x"$1" = x"-C" ] ; then
+  DRYRUN=""
+  shift
+fi
+
+if [ x"$1" = x"" ] ; then
+  echo "usage: $0 [ -C ] target1 ... targetN"
+  exit 1
+fi
+
+while (( "$#" )) ; do
+  rsync \
+    -cglOprtvzi \
+    "$DRYRUN" \
+    --delete \
+    --exclude=.git \
+    --exclude=src \
+    --exclude=bin \
+    --exclude=vendor \
+    --exclude=composer.js \
+    --exclude=tests \
+    --exclude=legacy \
+    --exclude=report \
+    --exclude=.* \
+    --exclude=pins.json \
+    --exclude=phpunit.xml \
+    --exclude=README.md \
+    --exclude=composer.* \
+    --exclude=config.yml \
+    --exclude=readership-map.js.php \
+    "$DIR" \
+    "$1"
+  shift
+done
