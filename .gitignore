@@ -1,6 +1,7 @@
 *.swp
 *.swo
-.htaccess
-vendor
-.env
+/.htaccess
+/vendor
+/.env
 /report
+/urls.json
