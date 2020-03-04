@@ -6,4 +6,8 @@ class NullResults {
    public function getRows() {
      return [];
    }
+
+   public function getTotalResults() {
+     return 0;
+   }
 }
