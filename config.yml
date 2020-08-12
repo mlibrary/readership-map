@@ -110,6 +110,25 @@ views:
     end:
       datefmt: Y-m-d
       date: yesterday
+  # Fulcrum / Amherst College Press
+  - id: 202426456
+    metrics: ga:pageviews
+    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    start:
+      datefmt: Y-m-d
+      date: -4 weeks
+    end:
+      datefmt: Y-m-d
+      date: yesterday
+  - id: 202426456
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~download_
+    start:
+      datefmt: Y-m-d
+      date: -4 weeks
+    end:
+      datefmt: Y-m-d
+      date: yesterday
   # Fulcrum / UMMAA
   - id: 218624776
     metrics: ga:pageviews
