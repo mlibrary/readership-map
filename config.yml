@@ -90,7 +90,7 @@ views:
     filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
   - id: 22140843
     metrics: ga:totalEvents
-    filters: ga:eventAction=~download_  
+    filters: ga:eventAction=~download_
   # Fulcrum / Lever Press
   - id: 123826825
     metrics: ga:pageviews
@@ -162,3 +162,31 @@ views:
   - id: 150701143
     metrics: ga:totalEvents
     filters: ga:eventCategory=~Download
+  #Fulcrum / UM Center for Chinese Studies (UMCCS)
+  - id: 218616260
+    metrics: ga:pageviews
+    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 218616260
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~download_
+  #Fulcrum / UM Center for Japanese Studies (UMCJS)
+  - id: 218667833
+    metrics: ga:pageviews
+    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 218667833
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~download_
+  #Fulcrum / UM Center for Southeast Asian Studies (UMCSEAS)
+  - id: 219834111
+    metrics: ga:pageviews
+    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 219834111
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~download_
+  #Fulcrum / UM Center for South Asian Studies (UMCSAS)
+  - id: 219840920
+    metrics: ga:pageviews
+    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 219840920
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~download_
