@@ -40,7 +40,7 @@ class Scraper {
 
     $html = @file_get_contents($url);
     if (empty($html)) {
-      $this->log("  Scrape failed: $url empty\n");
+      $this->log("  Scrape failed: $url empty / {$http_response_header[0]}\n");
       return $this->urls[$url] = NULL;
     }
     return $this->urls[$url] = $this->scrapeHTML($html, $url);
