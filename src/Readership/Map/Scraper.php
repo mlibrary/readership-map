@@ -25,12 +25,12 @@ class Scraper {
   public function scrape($url) {
 
     if (is_null($url)) {
-      $this->log("  Scrape failed: $url empty\n");
+      $this->log("  Scrape failed: $url null\n");
       return NULL;
     }
 
     if (isset($this->urls[$url])) {
-      $this->log("  Cached results: $url empty\n");
+      $this->log("  Cached results: $url\n");
       return $this->urls[$url];
     }
 
