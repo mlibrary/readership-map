@@ -88,7 +88,7 @@ class Scraper {
     }
     $this->log("Checking OA status\n");
 
-    $content = qp($qp, "img[@alt='Open Access icon']");
+    $content = qp($qp, "img[@alt='Open Access']");
     if ($content->length > 0) {
       $ret[] = 'open';
     }
