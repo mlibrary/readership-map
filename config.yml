@@ -91,6 +91,25 @@ views:
   - id: 22140843
     metrics: ga:totalEvents
     filters: ga:eventAction=~download_
+  #Fulcrum / Big Ten Open Books
+  - id: 284971125
+    metrics: ga:pageviews
+    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    start:
+      datefmt: Y-m-d
+      date: -4 weeks
+    end:
+      datefmt: Y-m-d
+      date: yesterday
+  - id: 284971125
+    metrics: ga:totalEvents
+    filters: ga:eventAction=~download_
+    start:
+      datefmt: Y-m-d
+      date: -4 weeks
+    end:
+      datefmt: Y-m-d
+      date: yesterday
   # Fulcrum / Lever Press
   - id: 123826825
     metrics: ga:pageviews
