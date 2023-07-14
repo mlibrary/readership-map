@@ -38,7 +38,9 @@ class Scraper {
       return $this->urls[$url] = NULL;
     }
 
-    $html = @file_get_contents($url);
+    $options = ['http' => ['user_agent' => 'Readership Map Metadata Scraper']];
+    $context = stream_context_create($options);
+    $html = @file_get_contents($url, FALSE, $context);
     if (empty($html)) {
       $this->log("  Scrape failed: $url empty / {$http_response_header[0]}\n");
       return $this->urls[$url] = NULL;
