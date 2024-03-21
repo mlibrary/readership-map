@@ -47,62 +47,70 @@ pinDistribution:
   - weight: 0.10
     count: 3
 
-# The list of views to gather pageviews and events from.
+# The list of streams to gather pageviews and events from.
 accounts:
   #MPub quod.lib colls, part 1
   - id: 10966839
-    metrics: ga:pageviews
-    filters: ga:pagePath=~(seq=|view=text|view=fulltext|view=pdf)
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~(seq=|view=text|view=fulltext|view=pdf)
   - id: 10966839
-    metrics: ga:totalEvents
+    metrics: eventCount
     filters: ga:eventAction=~Item View
   - id: 10966839
-    metrics: ga:totalEvents
+    metrics: eventCount
     filters: ga:eventCategory=~PDF Download
   #MPub quod.lib colls, part 2
   - id: 35132797
-    metrics: ga:pageviews
-    filters: ga:pagePath=~(seq=|view=text|view=fulltext|view=pdf)
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~(seq=|view=text|view=fulltext|view=pdf)
   - id: 35132797
-    metrics: ga:totalEvents
+    metrics: eventCount
     filters: ga:eventAction=~Item View
   - id: 35132797
-    metrics: ga:totalEvents
+    metrics: eventCount
     filters: ga:eventCategory=~PDF Download
-views:
+streams:
   #Fulcrum (all)
-  - id: 133129661
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-  - id: 133129661
-    metrics: ga:totalEvents
+  - id: 4423931303
+    property_id: 349453822
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4423931303
+    property_id: 349453822
+    metrics: eventCount
     filters: ga:eventAction=~download_
   #Fulcrum / Michigan
-  - id: 132442623
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-  - id: 132442623
-    metrics: ga:totalEvents
+  - id: 4561158127
+    property_id: 352199879
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4561158127
+    property_id: 352199879
+    metrics: eventCount
     filters: ga:eventAction=~download_
   #Fulcrum / HEB
-  - id: 22140843
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-  - id: 22140843
-    metrics: ga:totalEvents
+  - id: 4755115906
+    property_id: 359173256
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4755115906
+    property_id: 359173256
+    metrics: eventCount
     filters: ga:eventAction=~download_
   #Fulcrum / Big Ten Open Books
-  - id: 284971125
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4644734036
+    property_id: 354564446
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
     end:
       datefmt: Y-m-d
       date: yesterday
-  - id: 284971125
-    metrics: ga:totalEvents
+  - id: 4644734036
+    property_id: 354564446
+    metrics: eventCount
     filters: ga:eventAction=~download_
     start:
       datefmt: Y-m-d
@@ -111,17 +119,19 @@ views:
       datefmt: Y-m-d
       date: yesterday
   # Fulcrum / Lever Press
-  - id: 123826825
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4564902159
+    property_id: 352228685
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
     end:
       datefmt: Y-m-d
       date: yesterday
-  - id: 123826825
-    metrics: ga:totalEvents
+  - id: 4564902159
+    property_id: 352228685
+    metrics: eventCount
     filters: ga:eventAction=~download_
     start:
       datefmt: Y-m-d
@@ -130,17 +140,19 @@ views:
       datefmt: Y-m-d
       date: yesterday
   # Fulcrum / Amherst College Press
-  - id: 202426456
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4557309451
+    property_id: 352204545
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
     end:
       datefmt: Y-m-d
       date: yesterday
-  - id: 202426456
-    metrics: ga:totalEvents
+  - id: 4557309451
+    property_id: 352204545
+    metrics: eventCount
     filters: ga:eventAction=~download_
     start:
       datefmt: Y-m-d
@@ -149,17 +161,19 @@ views:
       datefmt: Y-m-d
       date: yesterday
   # Fulcrum / UMMAA
-  - id: 218624776
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4563416143
+    property_id: 352224564
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
     end:
       datefmt: Y-m-d
       date: yesterday
-  - id: 218624776
-    metrics: ga:totalEvents
+  - id: 4563416143
+    property_id: 352224564
+    metrics: eventCount
     filters: ga:eventAction=~download_
     start:
       datefmt: Y-m-d
@@ -168,17 +182,19 @@ views:
       datefmt: Y-m-d
       date: yesterday
     #Fulcrum / UM Center for Chinese Studies (UMCCS)
-  - id: 218616260
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4563052339
+    property_id: 352219711
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
     end:
       datefmt: Y-m-d
       date: yesterday
-  - id: 218616260
-    metrics: ga:totalEvents
+  - id: 4563052339
+    property_id: 352219711
+    metrics: eventCount
     filters: ga:eventAction=~download_
     start:
       datefmt: Y-m-d
@@ -187,17 +203,19 @@ views:
       datefmt: Y-m-d
       date: yesterday
   #Fulcrum / UM Center for Japanese Studies (UMCJS)
-  - id: 218667833
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4562158441
+    property_id: 352224972
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
     end:
       datefmt: Y-m-d
       date: yesterday
-  - id: 218667833
-    metrics: ga:totalEvents
+  - id: 4562158441
+    property_id: 352224972
+    metrics: eventCount
     filters: ga:eventAction=~download_
     start:
       datefmt: Y-m-d
@@ -206,17 +224,19 @@ views:
       datefmt: Y-m-d
       date: yesterday
   #Fulcrum / UM Center for Southeast Asian Studies (UMCSEAS)
-  - id: 219834111
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4563195478
+    property_id: 352197853
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
     end:
       datefmt: Y-m-d
       date: yesterday
-  - id: 219834111
-    metrics: ga:totalEvents
+  - id: 4563195478
+    property_id: 352197853
+    metrics: eventCount
     filters: ga:eventAction=~download_
     start:
       datefmt: Y-m-d
@@ -225,17 +245,19 @@ views:
       datefmt: Y-m-d
       date: yesterday
   #Fulcrum / UM Center for South Asian Studies (UMCSAS)
-  - id: 219840920
-    metrics: ga:pageviews
-    filters: ga:pagePath=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  - id: 4563043826
+    property_id: 352228770
+    metrics: screenPageViews
+    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
     end:
       datefmt: Y-m-d
       date: yesterday
-  - id: 219840920
-    metrics: ga:totalEvents
+  - id: 4563043826
+    property_id: 352228770
+    metrics: eventCount
     filters: ga:eventAction=~download_
     start:
       datefmt: Y-m-d
@@ -244,16 +266,20 @@ views:
       datefmt: Y-m-d
       date: yesterday
   # Deep Blue Data
-  - id: 120812821
-    metrics: ga:totalEvents
-    filters: ga:eventAction=~downloaded
-  - id: 120812821
-    metrics: ga:pageviews
-    filters: ga:pagePath=~data/downloads
+  #- id: 120812821
+  #  property_id: 
+  #  metrics: eventCount
+  #  filters: ga:eventAction=~downloaded
+  #- id: 120812821
+  #  property_id: 
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~data/downloads
   # Deep Blue Docs
-  - id: 150701143
-    metrics: ga:pageviews
-    filters: ga:pagePath=~bitstream
-  - id: 150701143
-    metrics: ga:totalEvents
-    filters: ga:eventCategory=~Download
+  #- id: 150701143
+  #  property_id: 
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~bitstream
+  #- id: 150701143
+  #  property_id: 
+  #  metrics: eventCount
+  #  filters: ga:eventCategory=~Download
