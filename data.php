@@ -1,5 +1,5 @@
 <?php
-ini_set('max_execution_time', '300'); //300 seconds = 5 minutes
+// ini_set('max_execution_time', '3000'); //3000 seconds = 50 minutes
 
 if(!defined('STDIN'))  define('STDIN',  fopen('php://stdin',  'rb'));
 if(!defined('STDOUT')) define('STDOUT', fopen('php://stdout', 'wb'));
@@ -39,7 +39,7 @@ $geo_count = 0;
 $pageviews = [ 'total' => [], 'annual' => [] ];
 $max_results = 1000;
 $streams_metadata = [];
-$loop_count = 100;
+$loop_count = 1000;
 $start = new DateTime();
 
 $analytics = new BetaAnalyticsDataClient();
@@ -85,7 +85,6 @@ function scrape($url = NULL) {
 
   if (empty($html)) {
     fwrite(STDERR, "  Scrape failed: $url empty\n");
-    //fwrite(STDERR, "$url response header: " . json_encode($http_response_header) . "\n");
     return $urls[$url] = NULL;
   }
 
@@ -135,12 +134,9 @@ function scrape($url = NULL) {
   }
   if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
     fwrite(STDERR, "  Scrape failed: $url unable to find metadata\n");
-    fwrite(STDERR, "    Response header: " . json_encode($http_response_header) . "\n");
     return $urls[$url] = NULL;
   }
 
-  fwrite(STDERR, "  Scrape succeeded: $url\n");
-  
   $ret = [
     'citation_title' => $ret[0],
     'citation_author' => $ret[1],
@@ -215,7 +211,7 @@ function load_accounts($adminClient) {
   return $ret;
 }
 
-function populate_geo_map($analytics, $adminClient, $property_id, $stream_id, $start_index = 1) {
+function populate_geo_map($analytics, $adminClient, $property_id, $stream_id, $start_index = 0) {
   global $geo_map, $geo_count;
   $geo_results = [];
 
@@ -238,6 +234,7 @@ function populate_geo_map($analytics, $adminClient, $property_id, $stream_id, $s
     ]
   */
 
+  // TODO: Update with paging
   $request = new RunReportRequest([
     'property' => "properties/$property_id",
     'dimensions' => $dimensions,
@@ -271,11 +268,10 @@ function populate_geo_map($analytics, $adminClient, $property_id, $stream_id, $s
     }
   }
 
-  /*
-  $start_index += 1000;
-  if ($geo_results->getTotalResults() > $start_index && $start_index < 5000) {
-    populate_geo_map($analytics, $view_id, $start_index);
-  }*/
+  $start_index += 10000;
+  if (count($geo_results) > $start_index && $start_index < 5000) {
+    populate_geo_map($analytics, $adminClient, $property_id, $stream_id, $start_index);
+  }
 
   if (!is_null($geo_map)) {
     file_put_contents('geo_map.json', json_encode($geo_map));
@@ -380,9 +376,8 @@ function query_stream_recent($property_id, $stream_id, $metrics, $filters) {
       'stream_id' => (string) $stream_id,
     ];
 
-    if($row_num++ >= $loop_count) break;
+    // if($row_num++ >= $loop_count) break;
   }
-  /*fwrite(STDERR, "  Scraped: " . (count($pins) - $before) . "\n");*/
 }
 
 function get_date_range($name, $start_date, $end_date) { 
@@ -525,7 +520,7 @@ function get_metadata($row, $id, $property_id) {
 
   foreach ($candidate_urls as $url) {
     if (strpos($url, 'http') !== 0) { continue; }
-    fwrite(STDERR, "Scraping for $property_id/$id\n");
+    
     $ret = scrape($url);
     if ($ret) { return $ret; }
   }
@@ -582,7 +577,7 @@ function process_streams($analytics, $adminClient, $streams) {
   $stream_num = 0;
   foreach ($streams as $stream) {
     process_stream($analytics, $adminClient, $stream);
-    if($stream_num++ == $loop_count) break;
+    // if($stream_num++ == $loop_count) break;
   }
 }
 
@@ -596,4 +591,4 @@ usort($pins, function($a, $b) {
 scrape();
 $elapsed = $start->diff(new DateTime())->format("%H:%i:%s");
 
-print json_encode(['elapsed' => $elapsed, 'geo_count' => $geo_count, 'pageviews' => $pageviews, 'pins' => $pins]);
+print json_encode(['geo_results' => $geo_results, 'pageviews' => $pageviews, 'pins' => $pins]);
