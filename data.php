@@ -18,16 +18,12 @@ use Google\Analytics\Data\V1beta\Metric;
 use Google\Analytics\Data\V1beta\Filter;
 use Google\Analytics\Data\V1beta\FilterExpression;
 use Google\Analytics\Data\V1beta\FilterExpressionList;
-use Google\Analytics\Data\V1beta\Filter\InListFilter;
 use Google\Analytics\Data\V1beta\Filter\StringFilter;
 use Google\Analytics\Data\V1beta\OrderBy;
 
-use Google\Analytics\Admin\V1beta\Account;
 use Google\Analytics\Admin\V1beta\Client\AnalyticsAdminServiceClient;
 use Google\Analytics\Admin\V1beta\ListAccountsRequest;
 use Google\Analytics\Admin\V1beta\ListPropertiesRequest;
-use Google\Analytics\Admin\V1beta\DataStream;
-use Google\Analytics\Admin\V1beta\GetDataStreamRequest;
 use Google\Analytics\Admin\V1beta\ListDataStreamsRequest;
 
 

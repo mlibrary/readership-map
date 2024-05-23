@@ -1,4 +1,4 @@
-#!/usr/bin/env php7.3
+#!/usr/bin/env php
 <?php
 namespace Readership\Map;
 
@@ -7,7 +7,7 @@ ini_set('log_errors_max_len', 0);
 
 $account = new AnalyticsAccount();
 $config = new Configuration();
-$config->addViews($account->getViews());
+$config->addStreams($account->getStreams());
 $scraper = new Scraper();
 
 $harvester = new Harvester($config, $account, $scraper);

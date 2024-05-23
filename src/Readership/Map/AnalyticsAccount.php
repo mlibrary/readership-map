@@ -4,19 +4,20 @@ namespace Readership\Map;
 class AnalyticsAccount {
   private $applicationName = 'Michigan Publishing Readership Map';
   private $scopes = [ 'https://www.googleapis.com/auth/analytics.readonly' ];
-  private $views;
+  private $streams;
   private $accountInfo;
   private $driver;
   
   public function __construct($driver = 'Readership\Map\GoogleClientDriver') {
     $this->driver = new $driver($this->applicationName, $this->scopes);
-    $this->views = $this->driver->getViews();
+    $this->streams = $this->driver->getStreams();
     $this->accountInfo = $this->driver->getAccountInfo();
   }
 
-  public function getViewRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
+  // TODO: (Testing) Update to streams
+  public function getStreamRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
     return $this->driver->query(
-      'ga:' . $id,
+      $id,
       $start,
       $end,
       $metrics,
@@ -24,14 +25,15 @@ class AnalyticsAccount {
         'dimensions' => $dimensions,
         'max-results' => $max_results,
         'filters' => $filters,
-        'sort' => 'ga:dateHourMinute',
+        'sort' => 'dateHourMinute',
       ]
     );
   }
 
-  public function getViewAnnual($id, $metrics, $filters) {
+  // TODO: (Testing) Update to streams
+  public function getStreamAnnual($id, $metrics, $filters) {
     return $this->driver->query(
-      'ga:' . $id,
+      $id,
       '365daysAgo',
       'today',
       $metrics,
@@ -39,9 +41,10 @@ class AnalyticsAccount {
     );
   }
 
-  public function getViewTotals($id, $metrics, $filters) {
+  // TODO: (Testing) Update to streams
+  public function getStreamTotals($id, $metrics, $filters) {
     return $this->driver->query(
-      'ga:' . $id,
+      $id,
       '2005-01-01',
       'today',
       $metrics,
@@ -49,21 +52,22 @@ class AnalyticsAccount {
     );
   }
 
+  // TODO: (Testing) Update tags
   public function getGeoData($id, $index) {
     return $this->driver->query(
-      'ga:' . $id,
+      $id,
       '7daysAgo',
       'today',
-      'ga:pageviews',
+      'screenPageViews',
       [
-        'dimensions' => 'ga:city,ga:region,ga:country,ga:latitude,ga:longitude',
+        'dimensions' => 'city,region,country,latitude,longitude',
         'start-index' => $index,
       ]
     );
   }
 
-  public function getViews() {
-    return $this->views;
+  public function getStreams() {
+    return $this->streams;
   }
 
   public function getAccountInfo() {

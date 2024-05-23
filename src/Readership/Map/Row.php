@@ -5,6 +5,8 @@ class Row {
   use Logging;
 
   private $data;
+  private $columns;
+  private $scraper;
 
   public function __construct($dimensions, $metrics, $row, $scraper) {
     $this->scraper = $scraper;

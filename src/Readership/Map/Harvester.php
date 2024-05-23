@@ -34,8 +34,8 @@ class Harvester {
   }
 
   public function run() {
-    foreach ($this->getViews() as $view) {
-      $this->processView($view);
+    foreach ($this->getStreams() as $stream) {
+      $this->processStream($stream);
     }
 
     $this->sortPins(function($a, $b) {
@@ -44,13 +44,13 @@ class Harvester {
     });
   }
 
-  private function processView($view) {
-    $this->log("Processing view: {$view['id']} / {$view['metrics']}\n");
+  private function processStream($stream) {
+    $this->log("Processing stream: {$stream['id']} / {$stream['metrics']}\n");
     try {
-      $this->populateGeoMap($view['id']);
-      $this->queryView($view);
+      $this->populateGeoMap($stream['id']);
+      $this->queryStream($stream);
     }
-    catch (Exception $e) {
+    catch (\Exception $e) {
       $this->log("  Exception caught: " . $e->getMessage() . "\n");
     }
   }
@@ -76,47 +76,48 @@ class Harvester {
     }
   }
 
-  private function getViewTotals($id, $metrics, $filters) {
-    return $this->analytics->getViewTotals($id, $metrics, $filters);
+  private function getStreamTotals($id, $metrics, $filters) {
+    return $this->analytics->getStreamTotals($id, $metrics, $filters);
   }
 
-  private function queryViewTotal($id, $metrics, $filters) {
-    $events = $this->getViewTotals($id, $metrics, $filters);
+  private function queryStreamTotal($id, $metrics, $filters) {
+    $events = $this->getStreamTotals($id, $metrics, $filters);
     $rows = $events->getRows();
     if (!empty($rows)) {
-      $this->pageviews['total'][] = ['count' => intval($rows[0][0]), 'view_id' => (string) $id];
+      $this->pageviews['total'][] = ['count' => intval($rows[0][0]), 'stream_id' => (string) $id];
     }
   }
 
-  private function getViewAnnual($id, $metrics, $filters) {
-    return $this->analytics->getViewAnnual($id, $metrics, $filters);
+  private function getStreamAnnual($id, $metrics, $filters) {
+    return $this->analytics->getStreamAnnual($id, $metrics, $filters);
   }
 
-  private function getViewRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
-    return $this->analytics->getViewRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters);
+  private function getStreamRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
+    return $this->analytics->getStreamRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters);
   }
 
-  private function queryViewAnnual($id, $metrics, $filters) {
-    $events = $this->getViewAnnual($id, $metrics, $filters);
+  private function queryStreamAnnual($id, $metrics, $filters) {
+    $events = $this->getStreamAnnual($id, $metrics, $filters);
     $rows = $events->getRows();
     if (!empty($rows)) {
-      $this->pageviews['annual'][] = ['count' => intval($rows[0][0]), 'view_id' => (string) $id];
+      $this->pageviews['annual'][] = ['count' => intval($rows[0][0]), 'stream_id' => (string) $id];
     }
   }
 
+  // TODO: (Testing) Update tags
   private function getDimensions($metrics) {
     return [
-      'ga:pageviews' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:pageTitle', 
-      'ga:totalEvents' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:eventLabel'
+      'screenPageViews' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,pageTitle',
+      'eventCount' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,eventName'
     ][$metrics];
   }
 
-  private function queryViewRecent($id, $start, $end, $metrics, $filters, $view_url) {
+  private function queryStreamRecent($id, $start, $end, $metrics, $filters, $stream_url) {
     $before = count($this->pins);
     $id = (string) $id;
     $dimensions = $this->getDimensions($metrics);
 
-    $results = $this->getViewRecent(
+    $results = $this->getStreamRecent(
       $id,
       $start,
       $end,
@@ -133,7 +134,7 @@ class Harvester {
       if (empty($position)) { continue; }
       $location = $row->getLocation();
       if (empty($location)) { continue; }
-      $metadata = $row->getMetadata($view_url);
+      $metadata = $row->getMetadata($stream_url);
       if (empty($metadata)) { continue; }
 
       $this->pins[] = [
@@ -144,28 +145,29 @@ class Harvester {
         'location' => $location,
         'position' => $position,
         'access' => $metadata['access'],
-        'view_id' => (string) $id,
+        'stream_id' => (string) $id,
       ];
     }
     $this->log("  Scraped: " . (count($this->pins) - $before) . "\n");
   }
 
-  private function queryView($view) {
-    $id = $view['id'];
-    $metrics = $view['metrics'];
-    $filters = $view['filters'];
-    $start   = isset($view['start']) ? $view['start'] : $this->recentPinsStart;
-    $end     = isset($view['end']) ? $view['end'] : $this->recentPinsEnd;
+  // TODO: Update to include both stream id and property id
+  private function queryStream($stream) {
+    $id = $stream['id'];
+    $metrics = $stream['metrics'];
+    $filters = $stream['filters'];
+    $start   = isset($stream['start']) ? $stream['start'] : $this->recentPinsStart;
+    $end     = isset($stream['end']) ? $stream['end'] : $this->recentPinsEnd;
 
-    $view_url = isset($view['view_url']) ? $view['view_url'] : '';
-    if (is_array($metrics)) { $metrics = implode($metrics, ','); }
-    if (is_array($filters)) { $filters = implode($filters, ','); }
-    $this->queryViewTotal($id, $metrics, $filters);
-    $this->queryViewAnnual($id, $metrics, $filters);
-    $this->queryViewRecent($id, $start, $end, $metrics, $filters, $view_url);
+    $stream_url = isset($stream['stream_url']) ? $stream['stream_url'] : '';
+    if (is_array($metrics)) { $metrics = implode(',', $metrics); }
+    if (is_array($filters)) { $filters = implode(',', $filters); }
+    $this->queryStreamTotal($id, $metrics, $filters);
+    $this->queryStreamAnnual($id, $metrics, $filters);
+    $this->queryStreamRecent($id, $start, $end, $metrics, $filters, $stream_url);
   }
 
-  private function getViews() {
-    return $this->config->getViews();
+  private function getStreams() {
+    return $this->config->getStreams();
   }
 }
