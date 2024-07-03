@@ -1,6 +1,7 @@
 <?php
 namespace Readership\Map;
 
+use Google\Analytics\Data\V1beta\DateRange;
 use Symfony\Component\Yaml\Yaml;
 
 class Configuration {
@@ -87,14 +88,6 @@ class Configuration {
         }
       }
     }
-  }
-
-  function get_date_range($name, $start_date, $end_date) { 
-    $dateRange = new DateRange(["name" => $name]);
-    $dateRange->setStartDate($start_date); 
-    $dateRange->setEndDate($end_date);
-  
-    return $dateRange;
   }
 
   public function getStreams() {

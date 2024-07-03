@@ -4,7 +4,7 @@ namespace Readership\Map;
 class Row {
   use Logging;
 
-  private $data;
+  private $data = [];
   private $columns;
   private $scraper;
 
@@ -42,6 +42,8 @@ class Row {
   }
 
   private function scrape($url) {
+    // TODO: Undo
+    return null;
     return $this->scraper->scrape($url);
   }
 

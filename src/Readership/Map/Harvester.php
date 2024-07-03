@@ -1,5 +1,6 @@
 <?php
 namespace Readership\Map;
+use Google\Analytics\Data\V1beta\Dimension;
 
 class Harvester {
   use Logging;
@@ -7,7 +8,7 @@ class Harvester {
   private $config;
   private $analytics;
   private $scraper;
-  private $geoMap;
+  private $geoMap = [];
   private $pageviews;
   private $recentPinsStart;
   private $recentPinsEnd;
@@ -34,7 +35,10 @@ class Harvester {
   }
 
   public function run() {
-    foreach ($this->getStreams() as $stream) {
+    $streams = $this->getStreams();
+    // $this->log(json_encode($streams));
+
+    foreach ($streams as $stream) {
       $this->processStream($stream);
     }
 
@@ -47,7 +51,7 @@ class Harvester {
   private function processStream($stream) {
     $this->log("Processing stream: {$stream['id']} / {$stream['metrics']}\n");
     try {
-      $this->populateGeoMap($stream['id']);
+      $this->populateGeoMap($stream['property_id'], $stream['id']);
       $this->queryStream($stream);
     }
     catch (\Exception $e) {
@@ -55,15 +59,32 @@ class Harvester {
     }
   }
 
-  private function getGeoData($id, $index) {
-    return $this->analytics->getGeoData($id, $index);
+  private function getGeoData($property_id, $id, $index) {
+    return $this->analytics->getGeoData($property_id, $id, $index);
   }
 
-  private function populateGeoMap($id, $start_index = 1) {
-    $geo_results = $this->getGeoData($id, $start_index);
+  private function populateGeoMap($property_id, $id, $start_index = 1) {
+    $geo_results = $this->getGeoData($property_id, $id, $start_index);
+    fwrite(STDERR, json_encode($geo_results, JSON_PRETTY_PRINT) . PHP_EOL);
+    fwrite(STDERR, "HEY!" . PHP_EOL);
+    if(count($this->geoMap) >= 10) exit;
 
-    foreach ((array)$geo_results->getRows() as $row) {
-      list($city, $region, $country, $lat, $lng) = $row;
+    $rows = $geo_results->getRows();
+
+    foreach ($rows as $row) {
+      $vals = $row->getDimensionValues();
+
+      $stuff[] = $vals[0]->getValue();
+      $stuff[] = $vals[1]->getValue();
+      $stuff[] = $vals[2]->getValue();
+      $stuff[] = $vals[3]->getValue();
+      $stuff[] = $vals[4]->getValue();
+      $stuff[] = $vals[5]->getValue();
+      $stuff[] = $vals[6]->getValue();
+
+      fwrite(STDERR, json_encode($stuff, JSON_PRETTY_PRINT) . PHP_EOL); 
+      exit;
+      fwrite(STDERR, "City: $city\nRegion: \$region\nCountry: $country\nLat: $lat\nLng: $lng");
       if ($lat == '0.000' && $lng == '0.000') {
         continue;
       }
@@ -71,36 +92,36 @@ class Harvester {
     }
 
     $start_index += 1000;
-    if ($geo_results->getTotalResults() > $start_index && $start_index < 5000) {
+    if (count($rows) > $start_index && $start_index < 5000) {
       $this->populateGeoMap($id, $start_index);
     }
   }
 
-  private function getStreamTotals($id, $metrics, $filters) {
-    return $this->analytics->getStreamTotals($id, $metrics, $filters);
+  private function getStreamTotals($property_id, $id, $metrics, $filters) {
+    return $this->analytics->getStreamTotals($property_id, $id, $metrics, $filters);
   }
 
-  private function queryStreamTotal($id, $metrics, $filters) {
-    $events = $this->getStreamTotals($id, $metrics, $filters);
+  private function queryStreamTotal($property_id, $id, $metrics, $filters) {
+    $events = $this->getStreamTotals($property_id, $id, $metrics, $filters);
     $rows = $events->getRows();
     if (!empty($rows)) {
-      $this->pageviews['total'][] = ['count' => intval($rows[0][0]), 'stream_id' => (string) $id];
+      $this->pageviews['total'][] = ['count' => intval($rows[0]->getMetricValues()[0]->getValue()), 'stream_id' => (string) $id];
     }
   }
 
-  private function getStreamAnnual($id, $metrics, $filters) {
-    return $this->analytics->getStreamAnnual($id, $metrics, $filters);
+  private function getStreamAnnual($property_id, $id, $metrics, $filters) {
+    return $this->analytics->getStreamAnnual($property_id, $id, $metrics, $filters);
   }
 
-  private function getStreamRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
-    return $this->analytics->getStreamRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters);
+  private function getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
+    return $this->analytics->getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters);
   }
 
-  private function queryStreamAnnual($id, $metrics, $filters) {
-    $events = $this->getStreamAnnual($id, $metrics, $filters);
-    $rows = $events->getRows();
-    if (!empty($rows)) {
-      $this->pageviews['annual'][] = ['count' => intval($rows[0][0]), 'stream_id' => (string) $id];
+  private function queryStreamAnnual($property_id, $id, $metrics, $filters) {
+    $events = $this->getStreamAnnual($property_id, $id, $metrics, $filters);
+    $rows = (array) $events->getRows();
+    if (!empty($rows) && !empty($rows[0])) {
+      $this->pageviews['annual'][] = ['count' => intval($rows[0]->getMetricValues()[0]->getValue()), 'stream_id' => (string) $id];
     }
   }
 
@@ -112,12 +133,14 @@ class Harvester {
     ][$metrics];
   }
 
-  private function queryStreamRecent($id, $start, $end, $metrics, $filters, $stream_url) {
+  private function queryStreamRecent($property_id, $id, $start, $end, $metrics, $filters, $stream_url) {
     $before = count($this->pins);
     $id = (string) $id;
+    $map = function($name) { return new Dimension(["name" => $name]); };
     $dimensions = $this->getDimensions($metrics);
 
     $results = $this->getStreamRecent(
+      $property_id,
       $id,
       $start,
       $end,
@@ -149,10 +172,12 @@ class Harvester {
       ];
     }
     $this->log("  Scraped: " . (count($this->pins) - $before) . "\n");
+    exit;
   }
 
   // TODO: Update to include both stream id and property id
   private function queryStream($stream) {
+    $property_id = $stream['property_id'];
     $id = $stream['id'];
     $metrics = $stream['metrics'];
     $filters = $stream['filters'];
@@ -162,9 +187,9 @@ class Harvester {
     $stream_url = isset($stream['stream_url']) ? $stream['stream_url'] : '';
     if (is_array($metrics)) { $metrics = implode(',', $metrics); }
     if (is_array($filters)) { $filters = implode(',', $filters); }
-    $this->queryStreamTotal($id, $metrics, $filters);
-    $this->queryStreamAnnual($id, $metrics, $filters);
-    $this->queryStreamRecent($id, $start, $end, $metrics, $filters, $stream_url);
+    $this->queryStreamTotal($property_id, $id, $metrics, $filters);
+    $this->queryStreamAnnual($property_id, $id, $metrics, $filters);
+    $this->queryStreamRecent($property_id, $id, $start, $end, $metrics, $filters, $stream_url);
   }
 
   private function getStreams() {

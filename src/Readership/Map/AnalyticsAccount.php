@@ -6,7 +6,7 @@ class AnalyticsAccount {
   private $scopes = [ 'https://www.googleapis.com/auth/analytics.readonly' ];
   private $streams;
   private $accountInfo;
-  private $driver;
+  private GoogleClientDriver $driver;
   
   public function __construct($driver = 'Readership\Map\GoogleClientDriver') {
     $this->driver = new $driver($this->applicationName, $this->scopes);
@@ -15,8 +15,9 @@ class AnalyticsAccount {
   }
 
   // TODO: (Testing) Update to streams
-  public function getStreamRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
+  public function getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
     return $this->driver->query(
+      $property_id,
       $id,
       $start,
       $end,
@@ -31,8 +32,9 @@ class AnalyticsAccount {
   }
 
   // TODO: (Testing) Update to streams
-  public function getStreamAnnual($id, $metrics, $filters) {
+  public function getStreamAnnual($property_id, $id, $metrics, $filters) {
     return $this->driver->query(
+      $property_id,
       $id,
       '365daysAgo',
       'today',
@@ -42,10 +44,11 @@ class AnalyticsAccount {
   }
 
   // TODO: (Testing) Update to streams
-  public function getStreamTotals($id, $metrics, $filters) {
+  public function getStreamTotals($property_id, $id, $metrics, $filters) {
     return $this->driver->query(
+      $property_id,
       $id,
-      '2005-01-01',
+      '2015-08-14',
       'today',
       $metrics,
       [ 'filters' => $filters ]
@@ -53,14 +56,15 @@ class AnalyticsAccount {
   }
 
   // TODO: (Testing) Update tags
-  public function getGeoData($id, $index) {
+  public function getGeoData($property_id, $id, $index) {
     return $this->driver->query(
+      $property_id,
       $id,
       '7daysAgo',
       'today',
       'screenPageViews',
       [
-        'dimensions' => 'city,region,country,latitude,longitude',
+        'dimensions' => 'city,region,country',
         'start-index' => $index,
       ]
     );

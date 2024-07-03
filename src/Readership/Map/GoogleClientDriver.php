@@ -21,6 +21,7 @@ use Google\Analytics\Admin\V1beta\ListPropertiesRequest;
 use Google\Analytics\Admin\V1beta\DataStream;
 use Google\Analytics\Admin\V1beta\GetDataStreamRequest;
 use Google\Analytics\Admin\V1beta\ListDataStreamsRequest;
+use Google\ApiCore\PagedListResponse;
 /**
  * @codeCoverageIgnore
  */
@@ -47,17 +48,81 @@ class GoogleClientDriver {
     return $dateRange;
   }
 
+  public function get_dimension($name) {
+    print("Getting Dimension $name" . PHP_EOL);
+    return new Dimension(["name" => $name]);
+  }
+
+  public function get_metric($name) {
+    print("Getting Metric $name" . PHP_EOL);
+    return new Metric(['name' => $name]);
+  }
+
+  public function get_stream_id_filter($stream_id){
+    return new FilterExpression([
+      'filter' => 
+        new Filter([
+          'field_name' => 'streamId',
+          'string_filter' => new StringFilter([
+            'value' => "$stream_id",
+            'match_type' => Filter\StringFilter\MatchType::EXACT
+          ])
+        ])
+          ]);
+  }
+
+  public function get_query_stream_filter_expression($stream_id, $filters){
+    return new FilterExpression([
+      'and_group' => new FilterExpressionList([
+        'expressions' => [
+          $this->get_stream_id_filter($stream_id),
+          new FilterExpression($filters)
+        ]
+      ])
+    ]);
+  }
+
   // TODO: Add in dimensions and filters
-  public function query($id, $start, $end, $metrics, $options) {
+  public function query($property_id, $id, $start, $end, $metrics, $options) {
     try {
       $dateRanges = [ $this->get_date_range('recent_range', $start, $end) ];
+      $map = function($name) { return $this->get_dimension($name); };
 
+      $dimensions_map = [
+        'screenPageViews' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,pageTitle',
+        'eventCount' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,eventName'
+      ];
+      // $dimensions = array_map('get_dimension', explode(",", $dimensions_map[$metrics->getName()]));
+
+      $dimension_values = $options["dimensions"] ?? $dimensions_map['screenPageViews'];
+      if(!str_contains($dimension_values, 'dateHourMinute')) {
+        $dimension_values = "$dimension_values,dateHourMintue";
+      }
+      $dimensions = array_map(
+        $map, 
+        explode(",", $dimension_values)
+      );
+
+      $filters_string = 'pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])';
+      $filters_data = explode('=~', $filters_string, 2);
+      $filters = [
+        'filter' => 
+          new Filter([
+            'field_name' => htmlspecialchars($filters_data[0]),
+            'string_filter' => new StringFilter([
+              'value' => htmlspecialchars($filters_data[1]
+            ),
+            'match_type' => Filter\StringFilter\MatchType::PARTIAL_REGEXP
+          ])
+        ])
+      ];
+      
       $request = new RunReportRequest([
-        'property' => $id,
+        'property' => "properties/$property_id",
         'date_ranges' => $dateRanges,
-        // 'dimensions' => $dimensions,
-        'metrics' => [ $metrics ],
-        // "dimension_filter" => get_query_stream_filter_expression($id, $filters),
+        'dimensions' => $dimensions,
+        'metrics' => [ $this->get_metric('screenPageViews')],
+        "dimension_filter" => $this->get_query_stream_filter_expression($id, $filters),
         'order_bys' => [
           new OrderBy([
               'dimension' => new OrderBy\DimensionOrderBy([
@@ -68,9 +133,11 @@ class GoogleClientDriver {
           ]),],
       ]);
 
-      return $this->analyticsClient->runReport($request);
+      $retVal = $this->analyticsClient->runReport($request);
+      return $retVal;
     }
     catch (\Exception $e) {
+      print(PHP_EOL . "EXCEPTION (query)" . PHP_EOL . $e->getMessage() . PHP_EOL);
       return new NullResults();
     }
   }
@@ -83,7 +150,7 @@ class GoogleClientDriver {
     return $this->streams;
   }
 
-  private function listAccounts() {
+  private function listAccounts() : PagedListResponse {
     try {
       $listAccountsRequest = new ListAccountsRequest();
       return $this->adminClient->listAccounts($listAccountsRequest);
@@ -117,34 +184,37 @@ class GoogleClientDriver {
 
   public function loadAccountData() {
 
-    $accountList = $this->listAccounts();
-    foreach ($accountList as $account) {
-      $accountId = explode('/', $account->getName())[1];
-      $this->accountInfo[$accountId] = [];
-      $accountName = $account->getDisplayName();
-    
+    $accounts = $this->listAccounts();
+    // fwrite(STDERR, $accounts . PHP_EOL);
+
+    foreach ($accounts as $account) {
+      $account_id = explode('/', $account->getName())[1];
+      $account_name = $account->getDisplayName();
+      
       $filter = new ListPropertiesRequest();
-      $filter->setFilter("parent:accounts/$accountId");
-      $propertyList = $this->adminClient->listProperties($filter);
-
-      foreach ($propertyList as $property) {
-        $propertyId = (string) explode('/', $property->getName())[1];
-        $propertyName = $property->getDisplayName();
-        $streams = $this->listDataStreams($propertyId);
-
-        foreach ($streams as $stream) {
+      $filter->setFilter("parent:accounts/$account_id");
+      $properties = $this->adminClient->listProperties($filter);
+  
+      foreach ($properties as $property) {
+        $property_id = (string) explode('/', $property->getName())[1];
+        $property_name = $property->getDisplayName();
+        $streamRequest = (new ListDataStreamsRequest());
+        $streamRequest->setParent("properties/$property_id");
+        $streams = $this->adminClient->listDataStreams($streamRequest);
+  
+       foreach ($streams as $stream) {
           $stream_id = (string) explode('/', $stream->getName())[3];
           $stream_name = $stream->getDisplayName();
           $stream_url  = $stream->getWebStreamData()->getDefaultUri();
-
-          $this->streams[] = [
+  
+          $this->streams[$stream_id] = [
             'id' => $stream_id,
             'stream_name' => $stream_name,
             'stream_url' => $stream_url,
-            'property_name' => $propertyName,
-            'property_id' => $propertyId,
-            'account_name' => $accountName,
-            'account_id' => $accountId,
+            'property_name' => $property_name,
+            'property_id' => $property_id,
+            'account_name' => $account_name,
+            'account_id' => $account_id,
           ];
         }
       }
