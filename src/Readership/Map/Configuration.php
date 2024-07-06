@@ -29,7 +29,6 @@ class Configuration {
     return $this->formatDate($this->config['end']);
   }
   
-  // TODO: (Testing) Update to streams
   public function addStreams($streams) {
     // Capture all of the stream_id => stream_url, start and end associations.
     $streamMetadata = [ 'stream_url' => [], 'start' => [], 'end' => [] ];
@@ -69,7 +68,6 @@ class Configuration {
     }
   }
 
-  // TODO: (Testing) Update to streams
   private function cleanConfig() {
     // Ensure that stream id's are handled like strings.
     foreach ((array) $this->config['streams'] as $i => $stream) {

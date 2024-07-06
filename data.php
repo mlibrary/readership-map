@@ -539,6 +539,7 @@ function query_stream($property_id, $stream_id, $metrics_string, $filters_string
     ];
     $metrics = get_metric($metrics_string);
 
+    // TODO: Uncomment
     query_stream_total($property_id, $stream_id, $metrics, $filters);
     query_stream_annual($property_id, $stream_id, $metrics, $filters);
     query_stream_recent($property_id, $stream_id, $metrics, $filters);

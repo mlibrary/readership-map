@@ -5,18 +5,22 @@ class Row {
   use Logging;
 
   private $data = [];
-  private $columns;
   private $scraper;
 
   public function __construct($dimensions, $metrics, $row, $scraper) {
     $this->scraper = $scraper;
     $this->data = [];
-    $this->columns = array_map(
-      function($item) { return substr($item, 3, strlen($item) -2); },
-      explode(',', implode(',', [$dimensions, $metrics]))
-    );
-    foreach ($this->columns as $i => $column) {
-      $this->data[$column] = $row[$i];
+
+    $dimension_values = $row->getDimensionValues();
+    $metric_values = $row->getMetricValues();
+
+    
+    foreach (explode(',', $dimensions) as $i => $column) {
+      $this->data[$column] = $dimension_values[$i]->getValue();
+    }
+
+    foreach (explode(',', $metrics) as $i => $column) {
+      $this->data[$column] = $metric_values[$i]->getValue();
     }
   }
 
@@ -25,47 +29,48 @@ class Row {
   }
 
   public function getPosition($geoMap) {
-    $key = "{$this->data['city']}//{$this->data['region']}//{$this->data['country']}";
-    if (empty($geoMap[$key])) { return null; }
+    $key = $this->data['region'] . '//' . $this->data['country'];
+    if(str_contains($key, '(not set)')){ 
+      return null;
+    }
+    
     return $geoMap[$key];
   }
 
 
   public function getLocation() {
     return join(
+      ', ',
       array_filter(
         array_unique([$this->data['city'], $this->data['region'], $this->data['country']]),
         function ($var) { return !empty($var) && $var != '(not set)'; }
-      ),
-      ', '
+      )
     );
   }
 
   private function scrape($url) {
-    // TODO: Undo
-    return null;
     return $this->scraper->scrape($url);
   }
 
-  public function getMetadata($view_url) {
+  public function getMetadata($stream_url) {
     $candidate_urls = [];
     
-    if (!empty($this->data['eventLabel'])) {
-      $candidate_urls = [$this->data['eventLabel']];
+    if (!empty($this->data['eventName'])) {
+      $candidate_urls = [$this->data['eventName']];
     }
-    if (!empty($this->data['hostname']) && !empty($this->data['pagePath'])) {
-      if (strpos($view_url, $this->data['hostname']) === FALSE && strlen($view_url) > 10) {
-        $candidate_urls[] = substr($view_url, strpos($view_url, '/', 9), strlen($view_url)) . $this->data['pagePath'];
+    if (!empty($this->data['hostName']) && !empty($this->data['pagePathPlusQueryString'])) {
+      if (strpos($stream_url, $this->data['hostName']) === FALSE && strlen($stream_url) > 10) {
+        $candidate_urls[] = substr($stream_url, strpos($stream_url, '/', 9), strlen($stream_url)) . $this->data['pagePathPlusQueryString'];
       }
 
-      if (strpos($this->data['hostname'], 'quod-lib-umich-edu') !== FALSE) {
-        $candidate_urls[] = 'https://quod.lib.umich.edu' . $this->data['pagePath'];
+      if (strpos($this->data['hostName'], 'quod-lib-umich-edu') !== FALSE) {
+        $candidate_urls[] = 'https://quod.lib.umich.edu' . $this->data['pagePathPlusQueryString'];
       }
 
-      if (strpos($this->data['hostname'], 'fulcrum-org') !== FALSE) {
-        $candidate_urls[] = 'https://www.fulcrum.org' . $this->data['pagePath'];
+      if (strpos($this->data['hostName'], 'fulcrum-org') !== FALSE) {
+        $candidate_urls[] = 'https://www.fulcrum.org' . $this->data['pagePathPlusQueryString'];
       }
-      $candidate_urls[] = 'https://' . $this->data['hostname'] . $this->data['pagePath'];
+      $candidate_urls[] = 'https://' . $this->data['hostName'] . $this->data['pagePathPlusQueryString'];
     }
 
     foreach ($candidate_urls as $url) {

@@ -49,180 +49,180 @@ pinDistribution:
 
 # The list of streams to gather pageviews and events from.
 accounts:
-  #MPub quod.lib colls, part 1
-  - id: 10966839
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~(seq=|view=text|view=fulltext|view=pdf)
-  - id: 10966839
-    metrics: eventCount
-    filters: eventAction=~Item View
-  - id: 10966839
-    metrics: eventCount
-    filters: fileExtension=~pdf
-  #MPub quod.lib colls, part 2
-  - id: 35132797
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~(seq=|view=text|view=fulltext|view=pdf)
-  - id: 35132797
-    metrics: eventCount
-    filters: eventAction=~Item View
-  - id: 35132797
-    metrics: eventCount
-    filters: fileExtension=~pdf
+#  #MPub quod.lib colls, part 1
+#  - id: 10966839
+#    metrics: screenPageViews
+#    filters: pagePathPlusQueryString=~(seq=|view=text|view=fulltext|view=pdf)
+#  - id: 10966839
+#    metrics: eventCount
+#    filters: eventAction=~Item View
+#  - id: 10966839
+#    metrics: eventCount
+#    filters: fileExtension=~pdf
+#  #MPub quod.lib colls, part 2
+#  - id: 35132797
+#    metrics: screenPageViews
+#    filters: pagePathPlusQueryString=~(seq=|view=text|view=fulltext|view=pdf)
+#  - id: 35132797
+#    metrics: eventCount
+#    filters: eventAction=~Item View
+#  - id: 35132797
+#    metrics: eventCount
+#    filters: fileExtension=~pdf
 streams:
   #Fulcrum (all)
-  - id: 4423931303
-    property_id: 349453822
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-  - id: 4423931303
-    property_id: 349453822
-    metrics: eventCount
-    filters: eventName=~file_download
+  #- id: 4423931303
+  #  property_id: 349453822
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #- id: 4423931303
+  #  property_id: 349453822
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
   #Fulcrum / Michigan
-  - id: 4561158127
-    property_id: 352199879
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-  - id: 4561158127
-    property_id: 352199879
-    metrics: eventCount
-    filters: eventName=~file_download
+  #- id: 4561158127
+  #  property_id: 352199879
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #- id: 4561158127
+  #  property_id: 352199879
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
   #Fulcrum / HEB
-  - id: 4755115906
-    property_id: 359173256
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-  - id: 4755115906
-    property_id: 359173256
-    metrics: eventCount
-    filters: eventName=~file_download
+  #- id: 4755115906
+  #  property_id: 359173256
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #- id: 4755115906
+  #  property_id: 359173256
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
   #Fulcrum / Big Ten Open Books
-  - id: 4644734036
-    property_id: 354564446
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  - id: 4644734036
-    property_id: 354564446
-    metrics: eventCount
-    filters: eventName=~file_download
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  # Fulcrum / Lever Press
-  - id: 4564902159
-    property_id: 352228685
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  - id: 4564902159
-    property_id: 352228685
-    metrics: eventCount
-    filters: eventName=~file_download
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  # Fulcrum / Amherst College Press
-  - id: 4557309451
-    property_id: 352204545
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  - id: 4557309451
-    property_id: 352204545
-    metrics: eventCount
-    filters: eventName=~file_download
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  # Fulcrum / UMMAA
-  - id: 4563416143
-    property_id: 352224564
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  - id: 4563416143
-    property_id: 352224564
-    metrics: eventCount
-    filters: eventName=~file_download
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-    #Fulcrum / UM Center for Chinese Studies (UMCCS)
-  - id: 4563052339
-    property_id: 352219711
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  - id: 4563052339
-    property_id: 352219711
-    metrics: eventCount
-    filters: eventName=~file_download
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  #Fulcrum / UM Center for Japanese Studies (UMCJS)
-  - id: 4562158441
-    property_id: 352224972
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  - id: 4562158441
-    property_id: 352224972
-    metrics: eventCount
-    filters: eventName=~file_download
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
+  #- id: 4644734036
+  #  property_id: 354564446
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  #- id: 4644734036
+  #  property_id: 354564446
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  ## Fulcrum / Lever Press
+  #- id: 4564902159
+  #  property_id: 352228685
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  #- id: 4564902159
+  #  property_id: 352228685
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  ## Fulcrum / Amherst College Press
+  #- id: 4557309451
+  #  property_id: 352204545
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  #- id: 4557309451
+  #  property_id: 352204545
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  ## Fulcrum / UMMAA
+  #- id: 4563416143
+  #  property_id: 352224564
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  #- id: 4563416143
+  #  property_id: 352224564
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  #  #Fulcrum / UM Center for Chinese Studies (UMCCS)
+  #- id: 4563052339
+  #  property_id: 352219711
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  #- id: 4563052339
+  #  property_id: 352219711
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  ##Fulcrum / UM Center for Japanese Studies (UMCJS)
+  #- id: 4562158441
+  #  property_id: 352224972
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  #- id: 4562158441
+  #  property_id: 352224972
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
   #Fulcrum / UM Center for Southeast Asian Studies (UMCSEAS)
   - id: 4563195478
     property_id: 352197853
@@ -245,26 +245,26 @@ streams:
       datefmt: Y-m-d
       date: yesterday
   #Fulcrum / UM Center for South Asian Studies (UMCSAS)
-  - id: 4563043826
-    property_id: 352228770
-    metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
-  - id: 4563043826
-    property_id: 352228770
-    metrics: eventCount
-    filters: eventName=~file_download
-    start:
-      datefmt: Y-m-d
-      date: -4 weeks
-    end:
-      datefmt: Y-m-d
-      date: yesterday
+  #- id: 4563043826
+  #  property_id: 352228770
+  #  metrics: screenPageViews
+  #  filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
+  #- id: 4563043826
+  #  property_id: 352228770
+  #  metrics: eventCount
+  #  filters: eventName=~file_download
+  #  start:
+  #    datefmt: Y-m-d
+  #    date: -4 weeks
+  #  end:
+  #    datefmt: Y-m-d
+  #    date: yesterday
   # Deep Blue Data
   #- id: 120812821
   #  property_id: 

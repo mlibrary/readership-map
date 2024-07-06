@@ -30,7 +30,6 @@ class Scraper {
     }
 
     if (isset($this->urls[$url])) {
-      $this->log("  Cached results: $url\n");
       return $this->urls[$url];
     }
 

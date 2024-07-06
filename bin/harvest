@@ -4,6 +4,7 @@ namespace Readership\Map;
 
 require_once __DIR__ . '/../src/autoload.php';
 ini_set('log_errors_max_len', 0);
+error_reporting(E_ALL ^ E_DEPRECATED);
 
 $account = new AnalyticsAccount();
 $config = new Configuration();

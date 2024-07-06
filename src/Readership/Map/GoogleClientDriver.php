@@ -49,12 +49,10 @@ class GoogleClientDriver {
   }
 
   public function get_dimension($name) {
-    print("Getting Dimension $name" . PHP_EOL);
     return new Dimension(["name" => $name]);
   }
 
   public function get_metric($name) {
-    print("Getting Metric $name" . PHP_EOL);
     return new Metric(['name' => $name]);
   }
 
@@ -72,17 +70,20 @@ class GoogleClientDriver {
   }
 
   public function get_query_stream_filter_expression($stream_id, $filters){
-    return new FilterExpression([
-      'and_group' => new FilterExpressionList([
-        'expressions' => [
-          $this->get_stream_id_filter($stream_id),
-          new FilterExpression($filters)
-        ]
-      ])
-    ]);
+    $stream_id_filter = $this->get_stream_id_filter($stream_id);
+
+    return $filters == null ? 
+      $stream_id_filter :
+      new FilterExpression([
+        'and_group' => new FilterExpressionList([
+          'expressions' => [
+            $stream_id_filter,
+            new FilterExpression($filters)
+          ]
+        ])
+      ]);
   }
 
-  // TODO: Add in dimensions and filters
   public function query($property_id, $id, $start, $end, $metrics, $options) {
     try {
       $dateRanges = [ $this->get_date_range('recent_range', $start, $end) ];
@@ -94,34 +95,37 @@ class GoogleClientDriver {
       ];
       // $dimensions = array_map('get_dimension', explode(",", $dimensions_map[$metrics->getName()]));
 
-      $dimension_values = $options["dimensions"] ?? $dimensions_map['screenPageViews'];
+      $dimension_values = $options["dimensions"] ?? $dimensions_map[$metrics];
       if(!str_contains($dimension_values, 'dateHourMinute')) {
-        $dimension_values = "$dimension_values,dateHourMintue";
+        $dimension_values = "$dimension_values,dateHourMinute";
       }
       $dimensions = array_map(
         $map, 
         explode(",", $dimension_values)
       );
 
-      $filters_string = 'pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])';
-      $filters_data = explode('=~', $filters_string, 2);
-      $filters = [
-        'filter' => 
-          new Filter([
-            'field_name' => htmlspecialchars($filters_data[0]),
-            'string_filter' => new StringFilter([
-              'value' => htmlspecialchars($filters_data[1]
-            ),
-            'match_type' => Filter\StringFilter\MatchType::PARTIAL_REGEXP
+      $filters = null;
+
+      if(key_exists("filters", $options)){
+        $filters_string = $options["filters"];
+        $filters_data = explode('=~', $filters_string, 2);
+        $filters = [
+          'filter' => 
+            new Filter([
+              'field_name' => htmlspecialchars($filters_data[0]),
+              'string_filter' => new StringFilter([
+                'value' => htmlspecialchars($filters_data[1]
+              ),
+              'match_type' => Filter\StringFilter\MatchType::PARTIAL_REGEXP
+            ])
           ])
-        ])
-      ];
-      
+        ];
+      }
       $request = new RunReportRequest([
         'property' => "properties/$property_id",
         'date_ranges' => $dateRanges,
         'dimensions' => $dimensions,
-        'metrics' => [ $this->get_metric('screenPageViews')],
+        'metrics' => [ $this->get_metric($metrics)],
         "dimension_filter" => $this->get_query_stream_filter_expression($id, $filters),
         'order_bys' => [
           new OrderBy([
@@ -137,7 +141,8 @@ class GoogleClientDriver {
       return $retVal;
     }
     catch (\Exception $e) {
-      print(PHP_EOL . "EXCEPTION (query)" . PHP_EOL . $e->getMessage() . PHP_EOL);
+      print(PHP_EOL . "EXCEPTION (query)" . PHP_EOL . $e->getMessage() . 
+            PHP_EOL . "Property ID: $property_id" . PHP_EOL);
       return new NullResults();
     }
   }
@@ -185,11 +190,12 @@ class GoogleClientDriver {
   public function loadAccountData() {
 
     $accounts = $this->listAccounts();
-    // fwrite(STDERR, $accounts . PHP_EOL);
 
     foreach ($accounts as $account) {
       $account_id = explode('/', $account->getName())[1];
       $account_name = $account->getDisplayName();
+      
+      // fwrite(STDERR, $account_id . PHP_EOL);
       
       $filter = new ListPropertiesRequest();
       $filter->setFilter("parent:accounts/$account_id");
@@ -206,6 +212,8 @@ class GoogleClientDriver {
           $stream_id = (string) explode('/', $stream->getName())[3];
           $stream_name = $stream->getDisplayName();
           $stream_url  = $stream->getWebStreamData()->getDefaultUri();
+
+          // fwrite(STDERR, "-- $stream_id $stream_name" . PHP_EOL);
   
           $this->streams[$stream_id] = [
             'id' => $stream_id,

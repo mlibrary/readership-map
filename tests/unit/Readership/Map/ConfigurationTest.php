@@ -13,7 +13,7 @@ class ConfigurationTest extends TestCase {
     $this->additionalViews = Yaml::parsefile("{$this->dataDir}/additionalViews.yml");
     $this->finalViews = Yaml::parsefile("{$this->dataDir}/finalViews.yml");
     $this->startDate = date('Y-m-d', strtotime('yesterday'));
-    $this->endDate = date('Y-m-d', strtotime('yesterday'));
+    $this->endDate = date('Y-m-d', strtotime('today'));
   }
 
   public function testPinStartDate() {

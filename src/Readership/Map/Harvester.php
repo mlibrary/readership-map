@@ -64,37 +64,76 @@ class Harvester {
   }
 
   private function populateGeoMap($property_id, $id, $start_index = 1) {
-    $geo_results = $this->getGeoData($property_id, $id, $start_index);
-    fwrite(STDERR, json_encode($geo_results, JSON_PRETTY_PRINT) . PHP_EOL);
-    fwrite(STDERR, "HEY!" . PHP_EOL);
-    if(count($this->geoMap) >= 10) exit;
+    $geo_results = [];
+    $geo_file = getcwd() . '/geo_map.json';
+  
+    if (count($this->geoMap) == 0 && file_exists($geo_file)) {
+      $this->geoMap = json_decode(file_get_contents($geo_file), TRUE);
+    }
 
+    $geo_results = $this->getGeoData($property_id, $id, $start_index);
     $rows = $geo_results->getRows();
 
     foreach ($rows as $row) {
-      $vals = $row->getDimensionValues();
+      $dimension_values = $row->getDimensionValues();
+      $city = $dimension_values[0]->getValue();
+      $region = $dimension_values[1]->getValue();
+      $country = $dimension_values[2]->getValue();
+      $geo_key = "$region//$country";
 
-      $stuff[] = $vals[0]->getValue();
-      $stuff[] = $vals[1]->getValue();
-      $stuff[] = $vals[2]->getValue();
-      $stuff[] = $vals[3]->getValue();
-      $stuff[] = $vals[4]->getValue();
-      $stuff[] = $vals[5]->getValue();
-      $stuff[] = $vals[6]->getValue();
+      if(!array_key_exists($geo_key, $this->geoMap)) {
+        $lat_lng = $this->get_lat_lng($city, $region, $country);
+        if($lat_lng != NULL) {
+          $lat_lng_arr = explode(',', $lat_lng);
+          $lat = $lat_lng_arr[0];
+          $lng = $lat_lng_arr[1];
 
-      fwrite(STDERR, json_encode($stuff, JSON_PRETTY_PRINT) . PHP_EOL); 
-      exit;
-      fwrite(STDERR, "City: $city\nRegion: \$region\nCountry: $country\nLat: $lat\nLng: $lng");
-      if ($lat == '0.000' && $lng == '0.000') {
-        continue;
+          //fwrite(STDERR, json_encode(['city'=>$city, 'region'=>$region, 'country'=>$country], JSON_PRETTY_PRINT) . PHP_EOL); 
+          //exit;
+          fwrite(STDERR, "Region: $region\nCountry: $country\nLat: $lat\nLng: $lng\n");
+          if ($lat == '0.000' && $lng == '0.000') {
+            continue;
+          }
+          $this->geoMap[$geo_key] = ['lat' => floatval($lat), 'lng' => floatval($lng)];
+        }
       }
-      $this->geoMap["$city//$region//$country"] = ['lat' => floatval($lat), 'lng' => floatval($lng)];
+    }
+
+    if (!is_null($this->geoMap)) {
+      file_put_contents($geo_file, json_encode($this->geoMap));
     }
 
     $start_index += 1000;
     if (count($rows) > $start_index && $start_index < 5000) {
       $this->populateGeoMap($id, $start_index);
     }
+  }
+
+  function get_lat_lng($city, $region, $country){
+    $not_set = '(not set)';
+    $address = "$region,$country";
+    if(str_contains($address, $not_set) || trim($address) == ",") {
+      return NULL;
+    }
+  
+    $address = str_replace(" ", "+", $address);
+    $geocode_url = "https://maps.google.com/maps/api/geocode/json?address=$address" . 
+                    "&sensor=false&key=AIzaSyBIV3qqPB5gLLGc21eWXyRbugB_MLH9Azs";
+                    
+    $contents = file_get_contents($geocode_url);
+    $json = json_decode($contents);
+  
+    if(count($json->{'results'}) > 0) {
+      $lat = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'};
+      $long = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'};
+      
+      return $lat.','.$long;
+    }
+    else {
+      fwrite(STDERR, "$geocode_url\n");
+      fwrite(STDERR, "$contents\n");
+    }
+    return NULL;
   }
 
   private function getStreamTotals($property_id, $id, $metrics, $filters) {
@@ -104,8 +143,12 @@ class Harvester {
   private function queryStreamTotal($property_id, $id, $metrics, $filters) {
     $events = $this->getStreamTotals($property_id, $id, $metrics, $filters);
     $rows = $events->getRows();
-    if (!empty($rows)) {
-      $this->pageviews['total'][] = ['count' => intval($rows[0]->getMetricValues()[0]->getValue()), 'stream_id' => (string) $id];
+    $total = 0;
+    foreach($rows as $row) {
+      $total += intval($row->getMetricValues()[0]->getValue());
+    }
+    if ($rows->count() > 0) {
+      $this->pageviews['total'][] = ['count' => $total, 'stream_id' => (string) $id];
     }
   }
 
@@ -119,13 +162,16 @@ class Harvester {
 
   private function queryStreamAnnual($property_id, $id, $metrics, $filters) {
     $events = $this->getStreamAnnual($property_id, $id, $metrics, $filters);
-    $rows = (array) $events->getRows();
-    if (!empty($rows) && !empty($rows[0])) {
-      $this->pageviews['annual'][] = ['count' => intval($rows[0]->getMetricValues()[0]->getValue()), 'stream_id' => (string) $id];
+    $rows = $events->getRows();
+    $total = 0;
+    foreach($rows as $row) {
+      $total += intval($row->getMetricValues()[0]->getValue());
+    }
+    if ($rows->count() > 0) {
+      $this->pageviews['annual'][] = ['count' => $total, 'stream_id' => (string) $id];
     }
   }
 
-  // TODO: (Testing) Update tags
   private function getDimensions($metrics) {
     return [
       'screenPageViews' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,pageTitle',
@@ -136,7 +182,6 @@ class Harvester {
   private function queryStreamRecent($property_id, $id, $start, $end, $metrics, $filters, $stream_url) {
     $before = count($this->pins);
     $id = (string) $id;
-    $map = function($name) { return new Dimension(["name" => $name]); };
     $dimensions = $this->getDimensions($metrics);
 
     $results = $this->getStreamRecent(
@@ -149,7 +194,7 @@ class Harvester {
       $this->recentMaxResults,
       $filters
     );
-    $rows = (array) $results->getRows();
+    $rows = $results->getRows();
     $this->log("  Found: " . count($rows) . "\n");
     foreach ($rows as $row) {
       $row = new Row($dimensions, $metrics, $row, $this->scraper);
@@ -172,10 +217,8 @@ class Harvester {
       ];
     }
     $this->log("  Scraped: " . (count($this->pins) - $before) . "\n");
-    exit;
   }
 
-  // TODO: Update to include both stream id and property id
   private function queryStream($stream) {
     $property_id = $stream['property_id'];
     $id = $stream['id'];
@@ -187,6 +230,7 @@ class Harvester {
     $stream_url = isset($stream['stream_url']) ? $stream['stream_url'] : '';
     if (is_array($metrics)) { $metrics = implode(',', $metrics); }
     if (is_array($filters)) { $filters = implode(',', $filters); }
+
     $this->queryStreamTotal($property_id, $id, $metrics, $filters);
     $this->queryStreamAnnual($property_id, $id, $metrics, $filters);
     $this->queryStreamRecent($property_id, $id, $start, $end, $metrics, $filters, $stream_url);

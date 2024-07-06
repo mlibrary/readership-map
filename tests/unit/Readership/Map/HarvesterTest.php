@@ -9,6 +9,7 @@ use Readership\Map\Scraper;
 use Symfony\Component\Yaml\Yaml;
 
 class StubResults {
+  private $data;
   public function __construct($data) {
     $this->data = $data;
   }
@@ -26,7 +27,7 @@ class StubResults {
 }
 
 class StubConfiguration extends Configuration {
-
+  private $data;
   public function __construct($file = '') {
     $this->data = Yaml::parsefile($file);
   }
@@ -37,11 +38,12 @@ class StubConfiguration extends Configuration {
 }
 
 class StubAnalyticsAccount extends AnalyticsAccount {
+  private $data;
   public function __construct($file = '') {
     $this->data = Yaml::parsefile($file);
   }
 
-  public function getGeoData($id, $index) {
+  public function getGeoData($property_id, $id, $index) {
     return new StubResults($this->data['getGeoData']);
   }
 
@@ -82,7 +84,9 @@ class StubScraper extends Scraper {
 }
 
 class HarvesterTest extends TestCase {
-
+  private $harvester;
+  private $emptyJSON;
+  private
   protected function setUp() : void {
     $this->dataDir = 'tests/data/Readership/Map/HarvesterTest';
     $this->config = new StubConfiguration($this->dataDir . '/config.yml');

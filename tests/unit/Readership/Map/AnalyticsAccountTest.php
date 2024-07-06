@@ -28,7 +28,9 @@ class StubDriver {
 }
 
 class AnalyticsAccountTest extends TestCase {
-
+  private AnalyticsAccount $account;
+  private $dataDir;
+  private $results;
   protected function setUp() : void {
     $this->dataDir = 'tests/data/Readership/Map/AnalyticsAccountTest';
     $this->account = new AnalyticsAccount('StubDriver');

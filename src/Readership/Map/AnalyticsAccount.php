@@ -14,7 +14,6 @@ class AnalyticsAccount {
     $this->accountInfo = $this->driver->getAccountInfo();
   }
 
-  // TODO: (Testing) Update to streams
   public function getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
     return $this->driver->query(
       $property_id,
@@ -31,7 +30,6 @@ class AnalyticsAccount {
     );
   }
 
-  // TODO: (Testing) Update to streams
   public function getStreamAnnual($property_id, $id, $metrics, $filters) {
     return $this->driver->query(
       $property_id,
@@ -43,7 +41,6 @@ class AnalyticsAccount {
     );
   }
 
-  // TODO: (Testing) Update to streams
   public function getStreamTotals($property_id, $id, $metrics, $filters) {
     return $this->driver->query(
       $property_id,
@@ -55,7 +52,6 @@ class AnalyticsAccount {
     );
   }
 
-  // TODO: (Testing) Update tags
   public function getGeoData($property_id, $id, $index) {
     return $this->driver->query(
       $property_id,
