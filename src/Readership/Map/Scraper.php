@@ -58,8 +58,6 @@ class Scraper {
       ['citation_doi', 'DC.Identifier', 'citation_hdl']
     ];
 
-    $this->log("Parsing meta_tags\n");
-
     foreach ($meta_tags as $tag_list) {
       $value = NULL;
       foreach($tag_list as $tag) {
@@ -76,7 +74,6 @@ class Scraper {
         $ret[] = '';
       }
     }
-    $this->log("Finished parsing meta_tags\n");
 
     if (strpos($ret[2], 'doi:') === 0) {
       $ret[2] = 'https://doi.org/' . substr($ret[2], 4, strlen($ret[2]));
@@ -87,7 +84,6 @@ class Scraper {
     } else {
       $ret[2] = $url;
     }
-    $this->log("Checking OA status\n");
 
     $content = qp($qp, "img[@alt='Open Access']");
     if ($content->length > 0) {
@@ -99,7 +95,7 @@ class Scraper {
     if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
       $ret = $this->scrapeCoins($qp);
       if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
-        $this->log("  Scrape failed: $url unable to find metadata\n");
+        //$this->log("  Scrape failed: $url unable to find metadata\n");
         return NULL;
       }
     }

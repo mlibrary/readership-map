@@ -147,8 +147,8 @@ class Harvester {
     foreach($rows as $row) {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
-    if ($rows->count() > 0) {
-      $this->pageviews['total'][] = ['count' => $total, 'stream_id' => (string) $id];
+    if (count($rows) > 0) {
+      $this->pageviews['total'][] = ['count' => $total, 'property_id' => (string) $property_id, 'stream_id' => (string) $id];
     }
   }
 
@@ -168,7 +168,7 @@ class Harvester {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
     if ($rows->count() > 0) {
-      $this->pageviews['annual'][] = ['count' => $total, 'stream_id' => (string) $id];
+      $this->pageviews['annual'][] = ['count' => $total, 'property_id' => (string) $property_id, 'stream_id' => (string) $id];
     }
   }
 

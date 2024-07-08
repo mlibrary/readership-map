@@ -10,7 +10,7 @@ use Google\Analytics\Data\V1beta\Metric;
 use Google\Analytics\Data\V1beta\Filter;
 use Google\Analytics\Data\V1beta\FilterExpression;
 use Google\Analytics\Data\V1beta\FilterExpressionList;
-use Google\Analytics\Data\V1beta\Filter\InListFilter;
+use Google\Analytics\Data\V1beta\Row;
 use Google\Analytics\Data\V1beta\Filter\StringFilter;
 use Google\Analytics\Data\V1beta\OrderBy;
 
@@ -84,6 +84,7 @@ class GoogleClientDriver {
       ]);
   }
 
+  // TODO: Add in dimensions and filters
   public function query($property_id, $id, $start, $end, $metrics, $options) {
     try {
       $dateRanges = [ $this->get_date_range('recent_range', $start, $end) ];
@@ -109,7 +110,7 @@ class GoogleClientDriver {
       if(key_exists("filters", $options)){
         $filters_string = $options["filters"];
         $filters_data = explode('=~', $filters_string, 2);
-        $filters = [
+        $filters = new FilterExpression([
           'filter' => 
             new Filter([
               'field_name' => htmlspecialchars($filters_data[0]),
@@ -119,14 +120,13 @@ class GoogleClientDriver {
               'match_type' => Filter\StringFilter\MatchType::PARTIAL_REGEXP
             ])
           ])
-        ];
+        ]);
       }
       $request = new RunReportRequest([
         'property' => "properties/$property_id",
         'date_ranges' => $dateRanges,
         'dimensions' => $dimensions,
         'metrics' => [ $this->get_metric($metrics)],
-        "dimension_filter" => $this->get_query_stream_filter_expression($id, $filters),
         'order_bys' => [
           new OrderBy([
               'dimension' => new OrderBy\DimensionOrderBy([
@@ -136,6 +136,10 @@ class GoogleClientDriver {
               'desc' => false,
           ]),],
       ]);
+
+      if($filters != null){ 
+        $request->setDimensionFilter($filters);
+      }
 
       $retVal = $this->analyticsClient->runReport($request);
       return $retVal;
