@@ -35,11 +35,11 @@ class Harvester {
   }
 
   public function run() {
-    $streams = $this->getStreams();
+    $properties = $this->getProperties();
     // $this->log(json_encode($streams));
 
-    foreach ($streams as $stream) {
-      $this->processStream($stream);
+    foreach ($properties as $property) {
+      $this->processProperty($property);
     }
 
     $this->sortPins(function($a, $b) {
@@ -48,22 +48,22 @@ class Harvester {
     });
   }
 
-  private function processStream($stream) {
-    $this->log("Processing stream: {$stream['id']} / {$stream['metrics']}\n");
+  private function processProperty($property) {
+    $this->log("Processing property: {$property['id']} / {$property['metrics']}\n");
     try {
-      $this->populateGeoMap($stream['property_id'], $stream['id']);
-      $this->queryStream($stream);
+      $this->populateGeoMap($property['id']);
+      $this->queryProperty($property);
     }
     catch (\Exception $e) {
       $this->log("  Exception caught: " . $e->getMessage() . "\n");
     }
   }
 
-  private function getGeoData($property_id, $id, $index) {
-    return $this->analytics->getGeoData($property_id, $id, $index);
+  private function getGeoData($id, $index) {
+    return $this->analytics->getGeoData($id, $index);
   }
 
-  private function populateGeoMap($property_id, $id, $start_index = 1) {
+  private function populateGeoMap($id, $start_index = 1) {
     $geo_results = [];
     $geo_file = getcwd() . '/geo_map.json';
   
@@ -71,7 +71,7 @@ class Harvester {
       $this->geoMap = json_decode(file_get_contents($geo_file), TRUE);
     }
 
-    $geo_results = $this->getGeoData($property_id, $id, $start_index);
+    $geo_results = $this->getGeoData($id, $start_index);
     $rows = $geo_results->getRows();
 
     foreach ($rows as $row) {
@@ -136,39 +136,39 @@ class Harvester {
     return NULL;
   }
 
-  private function getStreamTotals($property_id, $id, $metrics, $filters) {
-    return $this->analytics->getStreamTotals($property_id, $id, $metrics, $filters);
+  private function getPropertyTotals($id, $metrics, $filters) {
+    return $this->analytics->getPropertyTotals($id, $metrics, $filters);
   }
 
-  private function queryStreamTotal($property_id, $id, $metrics, $filters) {
-    $events = $this->getStreamTotals($property_id, $id, $metrics, $filters);
+  private function queryPropertyTotal($id, $metrics, $filters) {
+    $events = $this->getPropertyTotals($id, $metrics, $filters);
     $rows = $events->getRows();
     $total = 0;
     foreach($rows as $row) {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
     if (count($rows) > 0) {
-      $this->pageviews['total'][] = ['count' => $total, 'property_id' => (string) $property_id, 'stream_id' => (string) $id];
+      $this->pageviews['total'][] = ['count' => $total, 'property_id' => (string) $id ];
     }
   }
 
-  private function getStreamAnnual($property_id, $id, $metrics, $filters) {
-    return $this->analytics->getStreamAnnual($property_id, $id, $metrics, $filters);
+  private function getPropertyAnnual($id, $metrics, $filters) {
+    return $this->analytics->getPropertyAnnual($id, $metrics, $filters);
   }
 
-  private function getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
-    return $this->analytics->getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters);
+  private function getPropertyRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
+    return $this->analytics->getPropertyRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters);
   }
 
-  private function queryStreamAnnual($property_id, $id, $metrics, $filters) {
-    $events = $this->getStreamAnnual($property_id, $id, $metrics, $filters);
+  private function queryPropertyAnnual($id, $metrics, $filters) {
+    $events = $this->getPropertyAnnual($id, $metrics, $filters);
     $rows = $events->getRows();
     $total = 0;
     foreach($rows as $row) {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
     if ($rows->count() > 0) {
-      $this->pageviews['annual'][] = ['count' => $total, 'property_id' => (string) $property_id, 'stream_id' => (string) $id];
+      $this->pageviews['annual'][] = ['count' => $total, 'property_id' => (string) $id];
     }
   }
 
@@ -179,13 +179,12 @@ class Harvester {
     ][$metrics];
   }
 
-  private function queryStreamRecent($property_id, $id, $start, $end, $metrics, $filters, $stream_url) {
+  private function queryPropertyRecent($id, $start, $end, $metrics, $filters, $property_url) {
     $before = count($this->pins);
     $id = (string) $id;
     $dimensions = $this->getDimensions($metrics);
 
-    $results = $this->getStreamRecent(
-      $property_id,
+    $results = $this->getPropertyRecent(
       $id,
       $start,
       $end,
@@ -202,7 +201,7 @@ class Harvester {
       if (empty($position)) { continue; }
       $location = $row->getLocation();
       if (empty($location)) { continue; }
-      $metadata = $row->getMetadata($stream_url);
+      $metadata = $row->getMetadata($property_url);
       if (empty($metadata)) { continue; }
 
       $this->pins[] = [
@@ -213,30 +212,29 @@ class Harvester {
         'location' => $location,
         'position' => $position,
         'access' => $metadata['access'],
-        'stream_id' => (string) $id,
+        'property_id' => (string) $id,
       ];
     }
     $this->log("  Scraped: " . (count($this->pins) - $before) . "\n");
   }
 
-  private function queryStream($stream) {
-    $property_id = $stream['property_id'];
-    $id = $stream['id'];
-    $metrics = $stream['metrics'];
-    $filters = $stream['filters'];
-    $start   = isset($stream['start']) ? $stream['start'] : $this->recentPinsStart;
-    $end     = isset($stream['end']) ? $stream['end'] : $this->recentPinsEnd;
+  private function queryProperty($property) {
+    $id = $property['id'];
+    $metrics = $property['metrics'];
+    $filters = $property['filters'];
+    $start   = isset($property['start']) ? $property['start'] : $this->recentPinsStart;
+    $end     = isset($property['end']) ? $property['end'] : $this->recentPinsEnd;
 
-    $stream_url = isset($stream['stream_url']) ? $stream['stream_url'] : '';
+    $property_url = isset($property['property_url']) ? $property['property_url'] : '';
     if (is_array($metrics)) { $metrics = implode(',', $metrics); }
     if (is_array($filters)) { $filters = implode(',', $filters); }
 
-    $this->queryStreamTotal($property_id, $id, $metrics, $filters);
-    $this->queryStreamAnnual($property_id, $id, $metrics, $filters);
-    $this->queryStreamRecent($property_id, $id, $start, $end, $metrics, $filters, $stream_url);
+    $this->queryPropertyTotal($id, $metrics, $filters);
+    $this->queryPropertyAnnual($id, $metrics, $filters);
+    $this->queryPropertyRecent($id, $start, $end, $metrics, $filters, $property_url);
   }
 
-  private function getStreams() {
-    return $this->config->getStreams();
+  private function getProperties() {
+    return $this->config->getProperties();
   }
 }

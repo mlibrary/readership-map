@@ -28,7 +28,7 @@ use Google\ApiCore\PagedListResponse;
 class GoogleClientDriver {
   private $analyticsClient;
   private $adminClient;
-  private $streams = [];
+  private $properties = [];
   private $accountInfo = [];
   private $googleClientConfig = [
     'retries' => 5,
@@ -56,36 +56,8 @@ class GoogleClientDriver {
     return new Metric(['name' => $name]);
   }
 
-  public function get_stream_id_filter($stream_id){
-    return new FilterExpression([
-      'filter' => 
-        new Filter([
-          'field_name' => 'streamId',
-          'string_filter' => new StringFilter([
-            'value' => "$stream_id",
-            'match_type' => Filter\StringFilter\MatchType::EXACT
-          ])
-        ])
-          ]);
-  }
-
-  public function get_query_stream_filter_expression($stream_id, $filters){
-    $stream_id_filter = $this->get_stream_id_filter($stream_id);
-
-    return $filters == null ? 
-      $stream_id_filter :
-      new FilterExpression([
-        'and_group' => new FilterExpressionList([
-          'expressions' => [
-            $stream_id_filter,
-            new FilterExpression($filters)
-          ]
-        ])
-      ]);
-  }
-
   // TODO: Add in dimensions and filters
-  public function query($property_id, $id, $start, $end, $metrics, $options) {
+  public function query($id, $start, $end, $metrics, $options) {
     try {
       $dateRanges = [ $this->get_date_range('recent_range', $start, $end) ];
       $map = function($name) { return $this->get_dimension($name); };
@@ -123,7 +95,7 @@ class GoogleClientDriver {
         ]);
       }
       $request = new RunReportRequest([
-        'property' => "properties/$property_id",
+        'property' => "properties/$id",
         'date_ranges' => $dateRanges,
         'dimensions' => $dimensions,
         'metrics' => [ $this->get_metric($metrics)],
@@ -146,7 +118,7 @@ class GoogleClientDriver {
     }
     catch (\Exception $e) {
       print(PHP_EOL . "EXCEPTION (query)" . PHP_EOL . $e->getMessage() . 
-            PHP_EOL . "Property ID: $property_id" . PHP_EOL);
+            PHP_EOL . "Property ID: $id" . PHP_EOL);
       return new NullResults();
     }
   }
@@ -155,8 +127,8 @@ class GoogleClientDriver {
     return $this->accountInfo;
   }
 
-  public function getStreams() {
-    return $this->streams;
+  public function getProperties() {
+    return $this->properties;
   }
 
   private function listAccounts() : PagedListResponse {
@@ -206,10 +178,10 @@ class GoogleClientDriver {
       $properties = $this->adminClient->listProperties($filter);
   
       foreach ($properties as $property) {
-        $property_id = (string) explode('/', $property->getName())[1];
+        $id = (string) explode('/', $property->getName())[1];
         $property_name = $property->getDisplayName();
         $streamRequest = (new ListDataStreamsRequest());
-        $streamRequest->setParent("properties/$property_id");
+        $streamRequest->setParent("properties/$id");
         $streams = $this->adminClient->listDataStreams($streamRequest);
   
        foreach ($streams as $stream) {
@@ -219,12 +191,11 @@ class GoogleClientDriver {
 
           // fwrite(STDERR, "-- $stream_id $stream_name" . PHP_EOL);
   
-          $this->streams[$stream_id] = [
-            'id' => $stream_id,
+          $this->properties[$stream_id] = [
+            'id' => $id,
             'stream_name' => $stream_name,
             'stream_url' => $stream_url,
             'property_name' => $property_name,
-            'property_id' => $property_id,
             'account_name' => $account_name,
             'account_id' => $account_id,
           ];

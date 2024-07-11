@@ -8,7 +8,7 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 
 $account = new AnalyticsAccount();
 $config = new Configuration();
-$config->addStreams($account->getStreams());
+$config->addProperties($account->getProperties());
 $scraper = new Scraper();
 
 $harvester = new Harvester($config, $account, $scraper);

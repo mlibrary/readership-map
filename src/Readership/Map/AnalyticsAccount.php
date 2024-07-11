@@ -4,19 +4,18 @@ namespace Readership\Map;
 class AnalyticsAccount {
   private $applicationName = 'Michigan Publishing Readership Map';
   private $scopes = [ 'https://www.googleapis.com/auth/analytics.readonly' ];
-  private $streams;
+  private $properties;
   private $accountInfo;
   private GoogleClientDriver $driver;
   
   public function __construct($driver = 'Readership\Map\GoogleClientDriver') {
     $this->driver = new $driver($this->applicationName, $this->scopes);
-    $this->streams = $this->driver->getStreams();
+    $this->properties = $this->driver->getProperties();
     $this->accountInfo = $this->driver->getAccountInfo();
   }
 
-  public function getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
+  public function getPropertyRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
     return $this->driver->query(
-      $property_id,
       $id,
       $start,
       $end,
@@ -30,9 +29,8 @@ class AnalyticsAccount {
     );
   }
 
-  public function getStreamAnnual($property_id, $id, $metrics, $filters) {
+  public function getPropertyAnnual($id, $metrics, $filters) {
     return $this->driver->query(
-      $property_id,
       $id,
       '365daysAgo',
       'today',
@@ -41,9 +39,8 @@ class AnalyticsAccount {
     );
   }
 
-  public function getStreamTotals($property_id, $id, $metrics, $filters) {
+  public function getPropertyTotals($id, $metrics, $filters) {
     return $this->driver->query(
-      $property_id,
       $id,
       '2015-08-14',
       'today',
@@ -52,9 +49,8 @@ class AnalyticsAccount {
     );
   }
 
-  public function getGeoData($property_id, $id, $index) {
+  public function getGeoData($id, $index) {
     return $this->driver->query(
-      $property_id,
       $id,
       '7daysAgo',
       'today',
@@ -66,8 +62,8 @@ class AnalyticsAccount {
     );
   }
 
-  public function getStreams() {
-    return $this->streams;
+  public function getProperties() {
+    return $this->properties;
   }
 
   public function getAccountInfo() {
