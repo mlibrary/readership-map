@@ -147,8 +147,13 @@ class Harvester {
     foreach($rows as $row) {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
+    
+    fwrite(STDERR, PHP_EOL . "Total: $total" . PHP_EOL);
 
-    $this->pageviews['total'][] = ['count' => $total, 'property_id' => (string) $property_id];
+    if($total > 0)
+    {
+      $this->pageviews['total'][] = ['count' => $total, 'property_id' => (string) $property_id];
+    }
   }
 
   private function getStreamAnnual($property_id, $id, $metrics, $filters) {
@@ -169,9 +174,11 @@ class Harvester {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
     
-    fwrite(STDERR, PHP_EOL . 'PROPERTY TOTAL: ' . $total . PHP_EOL);
+    fwrite(STDERR, PHP_EOL . "Annual Total: $total" . PHP_EOL);
 
-    $this->pageviews['annual'][] = ['count' => $total, 'property_id' => (string) $property_id];
+    if($total > 0) {
+      $this->pageviews['annual'][] = ['count' => $total, 'property_id' => (string) $property_id];
+    }
   }
 
   private function getDimensions($metrics) {
