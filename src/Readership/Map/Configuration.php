@@ -72,6 +72,7 @@ class Configuration {
     // Ensure that stream id's are handled like strings.
     foreach ((array) $this->config['streams'] as $i => $stream) {
       $this->config['streams'][$i]['id'] = (string) $stream['id'];
+      $this->config['streams'][$i]['property_id'] = (string) $stream['property_id'];
       foreach (['start', 'end'] as $date) {
         if (isset($stream[$date])) {
           $this->config['streams'][$i][$date] = $this->formatDate($stream[$date]);

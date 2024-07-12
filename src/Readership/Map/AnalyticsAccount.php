@@ -14,6 +14,12 @@ class AnalyticsAccount {
     $this->accountInfo = $this->driver->getAccountInfo();
   }
 
+  public function testStream() {
+    $retVal = $this->driver->queryTest();
+    
+    return $retVal;
+  }
+
   public function getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
     return $this->driver->query(
       $property_id,

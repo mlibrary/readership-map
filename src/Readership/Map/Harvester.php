@@ -147,9 +147,8 @@ class Harvester {
     foreach($rows as $row) {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
-    if (count($rows) > 0) {
-      $this->pageviews['total'][] = ['count' => $total, 'property_id' => (string) $property_id, 'stream_id' => (string) $id];
-    }
+
+    $this->pageviews['total'][] = ['count' => $total, 'property_id' => (string) $property_id];
   }
 
   private function getStreamAnnual($property_id, $id, $metrics, $filters) {
@@ -162,14 +161,17 @@ class Harvester {
 
   private function queryStreamAnnual($property_id, $id, $metrics, $filters) {
     $events = $this->getStreamAnnual($property_id, $id, $metrics, $filters);
+    //fwrite(STDERR, $events->serializeToJsonString());exit;
+
     $rows = $events->getRows();
     $total = 0;
     foreach($rows as $row) {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
-    if ($rows->count() > 0) {
-      $this->pageviews['annual'][] = ['count' => $total, 'property_id' => (string) $property_id, 'stream_id' => (string) $id];
-    }
+    
+    fwrite(STDERR, PHP_EOL . 'PROPERTY TOTAL: ' . $total . PHP_EOL);
+
+    $this->pageviews['annual'][] = ['count' => $total, 'property_id' => (string) $property_id];
   }
 
   private function getDimensions($metrics) {
@@ -224,8 +226,8 @@ class Harvester {
     $id = $stream['id'];
     $metrics = $stream['metrics'];
     $filters = $stream['filters'];
-    $start   = isset($stream['start']) ? $stream['start'] : $this->recentPinsStart;
-    $end     = isset($stream['end']) ? $stream['end'] : $this->recentPinsEnd;
+    $start   = isset($stream['start']) ? $stream['start'] : $this->recentPinsStart->date;
+    $end     = isset($stream['end']) ? $stream['end'] : $this->recentPinsEnd->date;
 
     $stream_url = isset($stream['stream_url']) ? $stream['stream_url'] : '';
     if (is_array($metrics)) { $metrics = implode(',', $metrics); }

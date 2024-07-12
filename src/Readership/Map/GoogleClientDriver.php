@@ -84,9 +84,36 @@ class GoogleClientDriver {
       ]);
   }
 
+  public function queryTest() {
+    $dateRanges = [ $this->get_date_range('recent_range', '30daysAgo', 'today') ];
+    
+    $request = new RunReportRequest([
+      'property' => "properties/352197853",
+      'date_ranges' => $dateRanges,
+      'metrics' => [ $this->get_metric('screenPageViews')],
+      'dimensions' => [$this->get_dimension('pagePathPlusQueryString')],
+      /*'dimension_filter' => new FilterExpression([
+        'filter' => 
+          new Filter([
+            'field_name' => htmlspecialchars('pagePathPlusQueryString'),
+            'string_filter' => new StringFilter([
+              'value' => htmlspecialchars('^/(concern/.+?|epubs)/([A-Za-z0-9])'
+            ),
+            'match_type' => Filter\StringFilter\MatchType::PARTIAL_REGEXP
+          ])
+        ])
+      ])*/
+    ]);
+
+    $retVal = $this->analyticsClient->runReport($request);
+
+    return $retVal;
+  }
+
   // TODO: Add in dimensions and filters
   public function query($property_id, $id, $start, $end, $metrics, $options) {
     try {
+      fwrite(STDERR, PHP_EOL . "Start: " . json_encode($start) . PHP_EOL . json_encode($end) . PHP_EOL);
       $dateRanges = [ $this->get_date_range('recent_range', $start, $end) ];
       $map = function($name) { return $this->get_dimension($name); };
 
@@ -145,8 +172,11 @@ class GoogleClientDriver {
       return $retVal;
     }
     catch (\Exception $e) {
-      print(PHP_EOL . "EXCEPTION (query)" . PHP_EOL . $e->getMessage() . 
-            PHP_EOL . "Property ID: $property_id" . PHP_EOL);
+      $exception = PHP_EOL . "EXCEPTION (query)" . PHP_EOL . $e->getMessage() . 
+            PHP_EOL . "Property ID: $property_id " . 
+            PHP_EOL . $e->getTraceAsString() . PHP_EOL;
+      print($exception);
+      fwrite(STDERR, $exception);
       return new NullResults();
     }
   }
@@ -210,6 +240,7 @@ class GoogleClientDriver {
         $property_name = $property->getDisplayName();
         $streamRequest = (new ListDataStreamsRequest());
         $streamRequest->setParent("properties/$property_id");
+
         $streams = $this->adminClient->listDataStreams($streamRequest);
   
        foreach ($streams as $stream) {
