@@ -24,15 +24,11 @@ fi
 while (( "$#" )) ; do
   rsync \
     -cglOprtvzi \
-    "$DRYRUN" \
+    $DRYRUN \
     --delete \
     --exclude=.git \
     --exclude=src \
     --exclude=bin \
-    --exclude=vendor \
-    --exclude=composer.js \
-    --exclude=tests \
-    --exclude=legacy \
     --exclude=report \
     --exclude=.* \
     --exclude=pins.json \
