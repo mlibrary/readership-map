@@ -105,7 +105,7 @@ class Harvester {
 
     $start_index += 1000;
     if (count($rows) > $start_index && $start_index < 5000) {
-      $this->populateGeoMap($id, $start_index);
+      $this->populateGeoMap($property_id, $id, $start_index);
     }
   }
 

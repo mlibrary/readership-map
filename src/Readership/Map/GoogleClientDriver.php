@@ -110,7 +110,6 @@ class GoogleClientDriver {
     return $retVal;
   }
 
-  // TODO: Add in dimensions and filters
   public function query($property_id, $id, $start, $end, $metrics, $options) {
     try {
       fwrite(STDERR, PHP_EOL . "Start: " . json_encode($start) . PHP_EOL . json_encode($end) . PHP_EOL);
