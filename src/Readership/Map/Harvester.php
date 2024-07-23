@@ -233,8 +233,10 @@ class Harvester {
     $id = $stream['id'];
     $metrics = $stream['metrics'];
     $filters = $stream['filters'];
-    $start   = isset($stream['start']) ? $stream['start'] : $this->recentPinsStart->date;
-    $end     = isset($stream['end']) ? $stream['end'] : $this->recentPinsEnd->date;
+    $start   = isset($stream['start']) ? $stream['start'] : $this->recentPinsStart;
+    $end     = isset($stream['end']) ? $stream['end'] : $this->recentPinsEnd;
+
+    fwrite(STDERR, "Property ID: $property_id\nStart: $start\nEnd: $end");
 
     $stream_url = isset($stream['stream_url']) ? $stream['stream_url'] : '';
     if (is_array($metrics)) { $metrics = implode(',', $metrics); }
