@@ -37,7 +37,7 @@ class Scraper {
       return $this->urls[$url] = NULL;
     }
 
-    $options = ['http' => ['user_agent' => 'Readership Map Metadata Scraper']];
+    $options = ['http' => ['user_agent' => 'Readership Map Metadata Scraper Bot']];
     $context = stream_context_create($options);
     $html = @file_get_contents($url, FALSE, $context);
     if (empty($html)) {
