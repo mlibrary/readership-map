@@ -266,20 +266,20 @@ streams:
       datefmt: Y-m-d
       date: yesterday
   # Deep Blue Data
-  - id: 120812821
-    property_id: 
+  - id: 5155884408
+    property_id: 373818812
     metrics: eventCount
     filters: eventName=~downloaded
-  - id: 120812821
-    property_id: 
+  - id: 5155884408
+    property_id: 373818812
     metrics: screenPageViews
     filters: pagePathPlusQueryString=~data/downloads
   # Deep Blue Docs
-  - id: 150701143
-    property_id: 
+  - id: 5155884408
+    property_id: 373818812
     metrics: screenPageViews
     filters: pagePathPlusQueryString=~bitstream
-  - id: 150701143
-    property_id: 
+  - id: 5155884408
+    property_id: 373818812
     metrics: eventCount
     filters: eventName=~file_download
