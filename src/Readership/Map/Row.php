@@ -30,7 +30,7 @@ class Row {
 
   public function getPosition($geoMap) {
     $key = $this->data['region'] . '//' . $this->data['country'];
-    if(str_contains($key, '(not set)')){ 
+    if(str_contains($key, '(not set)') || !(array_key_exists($key, $geoMap))){ 
       return null;
     }
     
