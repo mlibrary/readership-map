@@ -90,7 +90,7 @@ class Harvester {
 
           //fwrite(STDERR, json_encode(['city'=>$city, 'region'=>$region, 'country'=>$country], JSON_PRETTY_PRINT) . PHP_EOL); 
           //exit;
-          fwrite(STDERR, "Region: $region\nCountry: $country\nLat: $lat\nLng: $lng\n");
+          // fwrite(STDERR, "Region: $region\nCountry: $country\nLat: $lat\nLng: $lng\n");
           if ($lat == '0.000' && $lng == '0.000') {
             continue;
           }
@@ -130,8 +130,8 @@ class Harvester {
       return $lat.','.$long;
     }
     else {
-      fwrite(STDERR, "$geocode_url\n");
-      fwrite(STDERR, "$contents\n");
+      // fwrite(STDERR, "$geocode_url\n");
+      // fwrite(STDERR, "$contents\n");
     }
     return NULL;
   }
@@ -148,7 +148,7 @@ class Harvester {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
     
-    fwrite(STDERR, PHP_EOL . "Total: $total" . PHP_EOL);
+    // fwrite(STDERR, PHP_EOL . "Total: $total" . PHP_EOL);
 
     if($total > 0)
     {
@@ -174,7 +174,7 @@ class Harvester {
       $total += intval($row->getMetricValues()[0]->getValue());
     }
     
-    fwrite(STDERR, PHP_EOL . "Annual Total: $total" . PHP_EOL);
+    // fwrite(STDERR, PHP_EOL . "Annual Total: $total" . PHP_EOL);
 
     if($total > 0) {
       $this->pageviews['annual'][] = ['count' => $total, 'property_id' => (string) $property_id];
@@ -236,7 +236,7 @@ class Harvester {
     $start   = isset($stream['start']) ? $stream['start'] : $this->recentPinsStart;
     $end     = isset($stream['end']) ? $stream['end'] : $this->recentPinsEnd;
 
-    fwrite(STDERR, "Property ID: $property_id\nStart: $start\nEnd: $end");
+    //fwrite(STDERR, "Property ID: $property_id\nStart: $start\nEnd: $end");
 
     $stream_url = isset($stream['stream_url']) ? $stream['stream_url'] : '';
     if (is_array($metrics)) { $metrics = implode(',', $metrics); }
