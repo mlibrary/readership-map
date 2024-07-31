@@ -5,7 +5,7 @@ class DataValidator {
   private $pinAttributes = [
     'title',
     'author',
-    'view_id',
+    'stream_id',
     'url',
     'access',
     'date',
