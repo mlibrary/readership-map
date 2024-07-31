@@ -47,7 +47,7 @@ class DataValidator {
 
   private function validCounts($counts) {
     foreach ($counts as $count) {
-      if (!isset($count['count']) || !isset($count['view_id'])) {
+      if (!isset($count['count']) || !isset($count['property_id'])) {
         return FALSE;
       }
     }

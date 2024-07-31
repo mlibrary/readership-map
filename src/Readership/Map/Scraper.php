@@ -41,7 +41,7 @@ class Scraper {
     $context = stream_context_create($options);
     $html = @file_get_contents($url, FALSE, $context);
     if (empty($html)) {
-      $reason = count($http_response_header) > 0 ? $http_response_header[0] : '';
+      $reason = !empty($htp_response_header) && count($http_response_header) > 0 ? $http_response_header[0] : '';
       $this->log("  Scrape failed: $url empty / $reason\n");
       return $this->urls[$url] = NULL;
     }
