@@ -32,11 +32,11 @@ function initMap() {
   }
 
   function filterPins(pins) {
-    if (!urlParams['filter.property'] || urlParams['filter.property'].length <= 0) {
+    if (!urlParams['filter.stream'] || urlParams['filter.stream'].length <= 0) {
       return pins;
     }
     return $.grep(pins, function (element) {
-      return $.inArray(element.property_id, urlParams['filter.property']) != -1;
+      return $.inArray(element.stream_id, urlParams['filter.stream']) != -1;
     });
   }
 
