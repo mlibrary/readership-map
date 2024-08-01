@@ -27,7 +27,7 @@ class Harvester {
   }
 
   public function toJSON() {
-    return json_encode(['pageviews' => $this->pageviews, 'pins' => $this->pins]);
+    return json_encode(['pageviews' => $this->pageviews, 'pins' => $this->pins], JSON_PRETTY_PRINT);
   }
 
   public function sortPins($fn) {
@@ -152,7 +152,11 @@ class Harvester {
 
     if($total > 0)
     {
-      $this->pageviews['total'][] = ['count' => $total, 'property_id' => (string) $property_id];
+      $this->pageviews['total'][] = [
+        'count' => $total, 
+        'property_id' => (string) $property_id, 
+        'stream_id' => (string) $id 
+      ];
     }
   }
 
@@ -177,7 +181,11 @@ class Harvester {
     // fwrite(STDERR, PHP_EOL . "Annual Total: $total" . PHP_EOL);
 
     if($total > 0) {
-      $this->pageviews['annual'][] = ['count' => $total, 'property_id' => (string) $property_id];
+      $this->pageviews['annual'][] = [
+        'count' => $total, 
+        'property_id' => (string) $property_id,
+        'stream_id' => (string) $id
+      ];
     }
   }
 
@@ -208,7 +216,7 @@ class Harvester {
     foreach ($rows as $row) {
       $row = new Row($dimensions, $metrics, $row, $this->scraper);
       $position = $row->getPosition($this->geoMap);
-      if (empty($position)) { continue; }
+      if (empty($position) || empty($position['lat']) || empty($position['lng'])) { continue; }
       $location = $row->getLocation();
       if (empty($location)) { continue; }
       $metadata = $row->getMetadata($stream_url);

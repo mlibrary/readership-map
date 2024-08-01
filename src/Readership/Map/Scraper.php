@@ -118,8 +118,11 @@ class Scraper {
     }
     $pairs = [];
     foreach (explode('&', $content) as $pair) {
-      list($key, $val) = explode('=', $pair, 2);
-      $pairs[$key] = urldecode($val);
+      $keyvalue = explode('=', $pair, 2);
+      if(count($keyvalue) == 2){
+        list($key, $val) = $keyvalue;
+        $pairs[$key] = urldecode($val);
+      }
     }
     return [
       isset($pairs['rft.title']) ? $pairs['rft.title'] : NULL,
