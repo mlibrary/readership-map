@@ -24,6 +24,7 @@ class Harvester {
     $this->recentPinsEnd = $this->config->pinEndDate();
     $this->recentMaxResults = 1000;
     $this->pins = [];
+    $this->populateHistoricalData();
   }
 
   public function toJSON() {
@@ -57,6 +58,43 @@ class Harvester {
     catch (\Exception $e) {
       $this->log("  Exception caught: " . $e->getMessage() . "\n");
     }
+  }
+
+  private function populateHistoricalData() {
+    $historical_file = getcwd() . '/data/historical_pageviews.json';
+    $id_file = getcwd() . '/data/id_map.json';
+
+    if(file_exists($historical_file) && file_exists($id_file)) {
+      $historical_data = json_decode(file_get_contents($historical_file), TRUE);
+      $id_map = json_decode(file_get_contents($id_file), TRUE);
+
+      foreach($historical_data['pageviews']['total'] as $count_record) {
+        $id_data = $this->getIdMapping($count_record, $id_map);
+
+        if(!empty($id_data)) {
+          $this->pageviews['total'][] = [
+            'count' => $count_record['count'], 
+            'property_id' => (string) $id_data['ga4_id'], 
+            'stream_id' => (string) $id_data['stream_id']
+          ];
+        }
+      }
+    }
+  }
+
+  private function getIdMapping($count_record, $id_map) {
+    $id_data = null;
+    $index = 0;
+
+    while(empty($id_data) && $index < count($id_map)) {
+      $id_record = $id_map[$index];
+      if(!empty($id_record) && $id_record['ua_id'] == $count_record['view_id']){
+        $id_data = $id_record;
+      }
+      $index++;
+    }
+
+    return $id_data;
   }
 
   private function getGeoData($property_id, $id, $index) {
