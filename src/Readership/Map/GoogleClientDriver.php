@@ -174,7 +174,6 @@ class GoogleClientDriver {
       $exception = PHP_EOL . "EXCEPTION (query)" . PHP_EOL . $e->getMessage() . 
             PHP_EOL . "Property ID: $property_id " . 
             PHP_EOL . $e->getTraceAsString() . PHP_EOL;
-      print($exception);
       fwrite(STDERR, $exception);
       return new NullResults();
     }
