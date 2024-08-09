@@ -36,7 +36,7 @@ function initMap() {
       return pins;
     }
     return $.grep(pins, function (element) {
-      return $.inArray(element.stream_id, urlParams['filter.stream']) != -1;
+      return $.inArray(element.stream_id ?? element.property_id, urlParams['filter.stream']) != -1;
     });
   }
 

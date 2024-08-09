@@ -112,7 +112,7 @@ class GoogleClientDriver {
 
   public function query($property_id, $id, $start, $end, $metrics, $options) {
     try {
-      //fwrite(STDERR, PHP_EOL . "Start: " . json_encode($start) . PHP_EOL . json_encode($end) . PHP_EOL);
+      fwrite(STDERR, PHP_EOL . "Start: " . json_encode($start) . PHP_EOL . json_encode($end) . PHP_EOL);
       $dateRanges = [ $this->get_date_range('recent_range', $start, $end) ];
       $map = function($name) { return $this->get_dimension($name); };
 
