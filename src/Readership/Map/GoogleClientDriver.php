@@ -10,7 +10,7 @@ use Google\Analytics\Data\V1beta\Metric;
 use Google\Analytics\Data\V1beta\Filter;
 use Google\Analytics\Data\V1beta\FilterExpression;
 use Google\Analytics\Data\V1beta\FilterExpressionList;
-use Google\Analytics\Data\V1beta\Row;
+use Google\Analytics\Data\V1beta\MetricAggregation;
 use Google\Analytics\Data\V1beta\Filter\StringFilter;
 use Google\Analytics\Data\V1beta\OrderBy;
 
@@ -112,7 +112,7 @@ class GoogleClientDriver {
 
   public function query($property_id, $id, $start, $end, $metrics, $options) {
     try {
-      fwrite(STDERR, PHP_EOL . "Start: " . json_encode($start) . PHP_EOL . json_encode($end) . PHP_EOL);
+      // fwrite(STDERR, PHP_EOL . "Start: " . json_encode($start) . PHP_EOL . json_encode($end) . PHP_EOL);
       $dateRanges = [ $this->get_date_range('recent_range', $start, $end) ];
       $map = function($name) { return $this->get_dimension($name); };
 
@@ -121,11 +121,12 @@ class GoogleClientDriver {
         'eventCount' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,eventName'
       ];
       // $dimensions = array_map('get_dimension', explode(",", $dimensions_map[$metrics->getName()]));
-
-      $dimension_values = $options["dimensions"] ?? $dimensions_map[$metrics];
+      $dimension_values = $dimensions_map[$metrics];
       if(!str_contains($dimension_values, 'dateHourMinute')) {
         $dimension_values = "$dimension_values,dateHourMinute";
       }
+
+      $dimension_values = $options["dimensions"] ?? $dimension_values;
       $dimensions = array_map(
         $map, 
         explode(",", $dimension_values)
@@ -139,11 +140,10 @@ class GoogleClientDriver {
         $filters = new FilterExpression([
           'filter' => 
             new Filter([
-              'field_name' => htmlspecialchars($filters_data[0]),
+              'field_name' => $filters_data[0],
               'string_filter' => new StringFilter([
-                'value' => htmlspecialchars($filters_data[1]
-              ),
-              'match_type' => Filter\StringFilter\MatchType::PARTIAL_REGEXP
+                'value' => $filters_data[1],
+                'match_type' => Filter\StringFilter\MatchType::PARTIAL_REGEXP
             ])
           ])
         ]);
@@ -153,14 +153,8 @@ class GoogleClientDriver {
         'date_ranges' => $dateRanges,
         'dimensions' => $dimensions,
         'metrics' => [ $this->get_metric($metrics)],
-        'order_bys' => [
-          new OrderBy([
-              'dimension' => new OrderBy\DimensionOrderBy([
-                  'dimension_name' => 'dateHourMinute', 
-                  'order_type' => OrderBy\DimensionOrderBy\OrderType::ALPHANUMERIC
-              ]),
-              'desc' => false,
-          ]),],
+        'metric_aggregations' => [MetricAggregation::TOTAL],
+        'limit' => 8000000
       ]);
 
       if($filters != null){ 

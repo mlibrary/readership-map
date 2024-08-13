@@ -52,7 +52,7 @@ class Harvester {
   private function processStream($stream) {
     $this->log("Processing stream: {$stream['id']} / {$stream['metrics']}\n");
     try {
-      $this->populateGeoMap($stream['property_id'], $stream['id']);
+      // $this->populateGeoMap($stream['property_id'], $stream['id']);
       $this->queryStream($stream);
     }
     catch (\Exception $e) {
@@ -181,17 +181,10 @@ class Harvester {
   private function queryStreamTotal($property_id, $id, $metrics, $filters) {
     $events = $this->getStreamTotals($property_id, $id, $metrics, $filters);
     $rows = $events->getRows();
-    $total = 0;
     foreach($rows as $row) {
-      $total += intval($row->getMetricValues()[0]->getValue());
-    }
-    
-    // fwrite(STDERR, PHP_EOL . "Total: $total" . PHP_EOL);
-
-    if($total > 0)
-    {
+      $count = intval($row->getMetricValues()[0]->getValue());
       $this->pageviews['total'][] = [
-        'count' => $total, 
+        'count' => $count, 
         'property_id' => (string) $property_id, 
         'stream_id' => (string) $id 
       ];
@@ -211,18 +204,12 @@ class Harvester {
     //fwrite(STDERR, $events->serializeToJsonString());exit;
 
     $rows = $events->getRows();
-    $total = 0;
     foreach($rows as $row) {
-      $total += intval($row->getMetricValues()[0]->getValue());
-    }
-    
-    // fwrite(STDERR, PHP_EOL . "Annual Total: $total" . PHP_EOL);
-
-    if($total > 0) {
+      $count = intval($row->getMetricValues()[0]->getValue());
       $this->pageviews['annual'][] = [
-        'count' => $total, 
-        'property_id' => (string) $property_id,
-        'stream_id' => (string) $id
+        'count' => $count, 
+        'property_id' => (string) $property_id, 
+        'stream_id' => (string) $id 
       ];
     }
   }

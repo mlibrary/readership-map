@@ -43,7 +43,10 @@ class AnalyticsAccount {
       '365daysAgo',
       'today',
       $metrics,
-      [ 'filters' => $filters ]
+      [ 
+        'filters' => $filters,
+        'dimensions' => 'unifiedPagePathScreen'
+      ]
     );
   }
 
@@ -54,7 +57,10 @@ class AnalyticsAccount {
       '2015-08-14',
       'today',
       $metrics,
-      [ 'filters' => $filters ]
+      [ 
+        'filters' => $filters,
+        'dimensions' => 'unifiedPagePathScreen'
+      ]
     );
   }
 
