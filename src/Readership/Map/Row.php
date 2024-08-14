@@ -58,19 +58,19 @@ class Row {
     if (!empty($this->data['eventName'])) {
       $candidate_urls = [$this->data['eventName']];
     }
-    if (!empty($this->data['hostName']) && !empty($this->data['pagePathPlusQueryString'])) {
+    if (!empty($this->data['hostName']) && !empty($this->data['unifiedPagePathScreen'])) {
       if (strpos($stream_url, $this->data['hostName']) === FALSE && strlen($stream_url) > 10) {
-        $candidate_urls[] = substr($stream_url, strpos($stream_url, '/', 9), strlen($stream_url)) . $this->data['pagePathPlusQueryString'];
+        $candidate_urls[] = substr($stream_url, strpos($stream_url, '/', 9), strlen($stream_url)) . $this->data['unifiedPagePathScreen'];
       }
 
       if (strpos($this->data['hostName'], 'quod-lib-umich-edu') !== FALSE) {
-        $candidate_urls[] = 'https://quod.lib.umich.edu' . $this->data['pagePathPlusQueryString'];
+        $candidate_urls[] = 'https://quod.lib.umich.edu' . $this->data['unifiedPagePathScreen'];
       }
 
       if (strpos($this->data['hostName'], 'fulcrum-org') !== FALSE) {
-        $candidate_urls[] = 'https://www.fulcrum.org' . $this->data['pagePathPlusQueryString'];
+        $candidate_urls[] = 'https://www.fulcrum.org' . $this->data['unifiedPagePathScreen'];
       }
-      $candidate_urls[] = 'https://' . $this->data['hostName'] . $this->data['pagePathPlusQueryString'];
+      $candidate_urls[] = 'https://' . $this->data['hostName'] . $this->data['unifiedPagePathScreen'];
     }
 
     foreach ($candidate_urls as $url) {

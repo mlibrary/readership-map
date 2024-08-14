@@ -52,7 +52,7 @@ class Harvester {
   private function processStream($stream) {
     $this->log("Processing stream: {$stream['id']} / {$stream['metrics']}\n");
     try {
-      // $this->populateGeoMap($stream['property_id'], $stream['id']);
+      $this->populateGeoMap($stream['property_id'], $stream['id']);
       $this->queryStream($stream);
     }
     catch (\Exception $e) {
@@ -216,8 +216,8 @@ class Harvester {
 
   private function getDimensions($metrics) {
     return [
-      'screenPageViews' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,pageTitle',
-      'eventCount' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,eventName'
+      'screenPageViews' => 'dateHourMinute,hostName,unifiedPagePathScreen,city,region,country,pageTitle',
+      'eventCount' => 'dateHourMinute,hostName,unifiedPagePathScreen,city,region,country,eventName'
     ][$metrics];
   }
 
@@ -241,6 +241,7 @@ class Harvester {
     foreach ($rows as $row) {
       $row = new Row($dimensions, $metrics, $row, $this->scraper);
       $position = $row->getPosition($this->geoMap);
+
       if (empty($position) || empty($position['lat']) || empty($position['lng'])) { continue; }
       $location = $row->getLocation();
       if (empty($location)) { continue; }

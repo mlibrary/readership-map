@@ -91,11 +91,11 @@ class GoogleClientDriver {
       'property' => "properties/352197853",
       'date_ranges' => $dateRanges,
       'metrics' => [ $this->get_metric('screenPageViews')],
-      'dimensions' => [$this->get_dimension('pagePathPlusQueryString')],
+      'dimensions' => [$this->get_dimension('unifiedPagePathScreen')],
       /*'dimension_filter' => new FilterExpression([
         'filter' => 
           new Filter([
-            'field_name' => htmlspecialchars('pagePathPlusQueryString'),
+            'field_name' => htmlspecialchars('unifiedPagePathScreen'),
             'string_filter' => new StringFilter([
               'value' => htmlspecialchars('^/(concern/.+?|epubs)/([A-Za-z0-9])'
             ),
@@ -115,10 +115,11 @@ class GoogleClientDriver {
       // fwrite(STDERR, PHP_EOL . "Start: " . json_encode($start) . PHP_EOL . json_encode($end) . PHP_EOL);
       $dateRanges = [ $this->get_date_range('recent_range', $start, $end) ];
       $map = function($name) { return $this->get_dimension($name); };
+      $limit = key_exists('max-results', $options) ? $options['max-results'] : 8000000000;
 
       $dimensions_map = [
-        'screenPageViews' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,pageTitle',
-        'eventCount' => 'dateHourMinute,hostName,pagePathPlusQueryString,city,region,country,eventName'
+        'screenPageViews' => 'dateHourMinute,hostName,unifiedPagePathScreen,city,region,country,pageTitle',
+        'eventCount' => 'dateHourMinute,hostName,unifiedPagePathScreen,city,region,country,eventName'
       ];
       // $dimensions = array_map('get_dimension', explode(",", $dimensions_map[$metrics->getName()]));
       $dimension_values = $dimensions_map[$metrics];
@@ -154,9 +155,8 @@ class GoogleClientDriver {
         'dimensions' => $dimensions,
         'metrics' => [ $this->get_metric($metrics)],
         'metric_aggregations' => [MetricAggregation::TOTAL],
-        'limit' => 8000000
+        'limit' => $limit
       ]);
-
       if($filters != null){ 
         $request->setDimensionFilter($filters);
       }
