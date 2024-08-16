@@ -180,8 +180,8 @@ class Harvester {
 
   private function queryStreamTotal($property_id, $id, $metrics, $filters) {
     $events = $this->getStreamTotals($property_id, $id, $metrics, $filters);
-    $rows = $events->getRows();
-    foreach($rows as $row) {
+    $totals = $events->getTotals();
+    foreach($totals as $row) {
       $count = intval($row->getMetricValues()[0]->getValue());
       $this->pageviews['total'][] = [
         'count' => $count, 
@@ -203,8 +203,8 @@ class Harvester {
     $events = $this->getStreamAnnual($property_id, $id, $metrics, $filters);
     //fwrite(STDERR, $events->serializeToJsonString());exit;
 
-    $rows = $events->getRows();
-    foreach($rows as $row) {
+    $totals = $events->getTotals();
+    foreach($totals as $row) {
       $count = intval($row->getMetricValues()[0]->getValue());
       $this->pageviews['annual'][] = [
         'count' => $count, 
