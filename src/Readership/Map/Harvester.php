@@ -182,12 +182,15 @@ class Harvester {
     $events = $this->getStreamTotals($property_id, $id, $metrics, $filters);
     $totals = $events->getTotals();
     foreach($totals as $row) {
-      $count = intval($row->getMetricValues()[0]->getValue());
-      $this->pageviews['total'][] = [
-        'count' => $count, 
-        'property_id' => (string) $property_id, 
-        'stream_id' => (string) $id 
-      ];
+      $metric_values = $row->getMetricValues();
+      if(count($metric_values) > 0){
+        $count = intval($metric_values[0]->getValue());
+        $this->pageviews['total'][] = [
+          'count' => $count, 
+          'property_id' => (string) $property_id, 
+          'stream_id' => (string) $id 
+        ];
+      }
     }
   }
 
@@ -205,12 +208,15 @@ class Harvester {
 
     $totals = $events->getTotals();
     foreach($totals as $row) {
-      $count = intval($row->getMetricValues()[0]->getValue());
-      $this->pageviews['annual'][] = [
-        'count' => $count, 
-        'property_id' => (string) $property_id, 
-        'stream_id' => (string) $id 
-      ];
+      $metric_values = $row->getMetricValues();
+      if(count($metric_values) > 0){
+        $count = intval($metric_values[0]->getValue());
+        $this->pageviews['annual'][] = [
+          'count' => $count, 
+          'property_id' => (string) $property_id, 
+          'stream_id' => (string) $id 
+        ];
+      }
     }
   }
 
