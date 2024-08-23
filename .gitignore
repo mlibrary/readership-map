@@ -5,3 +5,8 @@
 /.env
 /report
 /urls.json
+/logs
+pins.json*
+.jenv
+.php-version
+readership-map-harvester*

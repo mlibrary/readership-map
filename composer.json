@@ -9,10 +9,12 @@
         }
     ],
     "require": {
-        "google/apiclient": "^2.0",
-        "querypath/querypath": "^3.0",
+        "querypath/querypath": "3.0.5",
         "symfony/yaml": "^3.4",
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": "10.5.14",
+        "google/analytics-data": "^0.16.1",
+        "google/analytics-admin": "^0.22.1",
+        "ext-bcmath": "*"
     },
     "autoload": {
         "psr-4": {
@@ -21,5 +23,10 @@
     },
     "require-dev": {
         "php-coveralls/php-coveralls": "^2.2"
+    },
+    "extra": {
+        "google/apiclient-services": [
+            "Analytics"
+        ]
     }
 }

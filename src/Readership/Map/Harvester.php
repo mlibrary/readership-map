@@ -1,5 +1,6 @@
 <?php
 namespace Readership\Map;
+use Google\Analytics\Data\V1beta\Dimension;
 
 class Harvester {
   use Logging;
@@ -7,7 +8,7 @@ class Harvester {
   private $config;
   private $analytics;
   private $scraper;
-  private $geoMap;
+  private $geoMap = [];
   private $pageviews;
   private $recentPinsStart;
   private $recentPinsEnd;
@@ -23,10 +24,11 @@ class Harvester {
     $this->recentPinsEnd = $this->config->pinEndDate();
     $this->recentMaxResults = 1000;
     $this->pins = [];
+    $this->populateHistoricalData();
   }
 
   public function toJSON() {
-    return json_encode(['pageviews' => $this->pageviews, 'pins' => $this->pins]);
+    return json_encode(['pageviews' => $this->pageviews, 'pins' => $this->pins], JSON_PRETTY_PRINT);
   }
 
   public function sortPins($fn) {
@@ -34,8 +36,11 @@ class Harvester {
   }
 
   public function run() {
-    foreach ($this->getViews() as $view) {
-      $this->processView($view);
+    $streams = $this->getStreams();
+    // $this->log(json_encode($streams));
+
+    foreach ($streams as $stream) {
+      $this->processStream($stream);
     }
 
     $this->sortPins(function($a, $b) {
@@ -44,79 +49,191 @@ class Harvester {
     });
   }
 
-  private function processView($view) {
-    $this->log("Processing view: {$view['id']} / {$view['metrics']}\n");
+  private function processStream($stream) {
+    $this->log("Processing stream: {$stream['id']} / {$stream['metrics']}\n");
     try {
-      $this->populateGeoMap($view['id']);
-      $this->queryView($view);
+      $this->populateGeoMap($stream['property_id'], $stream['id']);
+      $this->queryStream($stream);
     }
-    catch (Exception $e) {
+    catch (\Exception $e) {
       $this->log("  Exception caught: " . $e->getMessage() . "\n");
     }
   }
 
-  private function getGeoData($id, $index) {
-    return $this->analytics->getGeoData($id, $index);
+  private function populateHistoricalData() {
+    $historical_file = getcwd() . '/data/historical_pageviews.json';
+    $id_file = getcwd() . '/data/id_map.json';
+
+    if(file_exists($historical_file) && file_exists($id_file)) {
+      $historical_data = json_decode(file_get_contents($historical_file), TRUE);
+      $id_map = json_decode(file_get_contents($id_file), TRUE);
+
+      foreach($historical_data['pageviews']['total'] as $count_record) {
+        $id_data = $this->getIdMapping($count_record, $id_map);
+
+        if(!empty($id_data)) {
+          $this->pageviews['total'][] = [
+            'count' => $count_record['count'], 
+            'property_id' => (string) $id_data['ga4_id'], 
+            'stream_id' => (string) $id_data['stream_id']
+          ];
+        }
+      }
+    }
   }
 
-  private function populateGeoMap($id, $start_index = 1) {
-    $geo_results = $this->getGeoData($id, $start_index);
+  private function getIdMapping($count_record, $id_map) {
+    $id_data = null;
+    $index = 0;
 
-    foreach ((array)$geo_results->getRows() as $row) {
-      list($city, $region, $country, $lat, $lng) = $row;
-      if ($lat == '0.000' && $lng == '0.000') {
-        continue;
+    while(empty($id_data) && $index < count($id_map)) {
+      $id_record = $id_map[$index];
+      if(!empty($id_record) && $id_record['ua_id'] == $count_record['view_id']){
+        $id_data = $id_record;
       }
-      $this->geoMap["$city//$region//$country"] = ['lat' => floatval($lat), 'lng' => floatval($lng)];
+      $index++;
+    }
+
+    return $id_data;
+  }
+
+  private function getGeoData($property_id, $id, $index) {
+    return $this->analytics->getGeoData($property_id, $id, $index);
+  }
+
+  private function populateGeoMap($property_id, $id, $start_index = 1) {
+    $geo_results = [];
+    $geo_file = getcwd() . '/geo_map.json';
+  
+    if (count($this->geoMap) == 0 && file_exists($geo_file)) {
+      $this->geoMap = json_decode(file_get_contents($geo_file), TRUE);
+    }
+
+    $geo_results = $this->getGeoData($property_id, $id, $start_index);
+    $rows = $geo_results->getRows();
+
+    foreach ($rows as $row) {
+      $dimension_values = $row->getDimensionValues();
+      $city = $dimension_values[0]->getValue();
+      $region = $dimension_values[1]->getValue();
+      $country = $dimension_values[2]->getValue();
+      $geo_key = "$region//$country";
+
+      if(!array_key_exists($geo_key, $this->geoMap)) {
+        $lat_lng = $this->get_lat_lng($city, $region, $country);
+        if($lat_lng != NULL) {
+          $lat_lng_arr = explode(',', $lat_lng);
+          $lat = $lat_lng_arr[0];
+          $lng = $lat_lng_arr[1];
+
+          //fwrite(STDERR, json_encode(['city'=>$city, 'region'=>$region, 'country'=>$country], JSON_PRETTY_PRINT) . PHP_EOL); 
+          //exit;
+          // fwrite(STDERR, "Region: $region\nCountry: $country\nLat: $lat\nLng: $lng\n");
+          if ($lat == '0.000' && $lng == '0.000') {
+            continue;
+          }
+          $this->geoMap[$geo_key] = ['lat' => floatval($lat), 'lng' => floatval($lng)];
+        }
+      }
+    }
+
+    if (!is_null($this->geoMap)) {
+      file_put_contents($geo_file, json_encode($this->geoMap));
     }
 
     $start_index += 1000;
-    if ($geo_results->getTotalResults() > $start_index && $start_index < 5000) {
-      $this->populateGeoMap($id, $start_index);
+    if (count($rows) > $start_index && $start_index < 5000) {
+      $this->populateGeoMap($property_id, $id, $start_index);
     }
   }
 
-  private function getViewTotals($id, $metrics, $filters) {
-    return $this->analytics->getViewTotals($id, $metrics, $filters);
+  function get_lat_lng($city, $region, $country){
+    $not_set = '(not set)';
+    $address = "$region,$country";
+    if(str_contains($address, $not_set) || trim($address) == ",") {
+      return NULL;
+    }
+  
+    $address = str_replace(" ", "+", $address);
+    $geocode_url = "https://maps.google.com/maps/api/geocode/json?address=$address" . 
+                    "&sensor=false&key=AIzaSyBIV3qqPB5gLLGc21eWXyRbugB_MLH9Azs";
+                    
+    $contents = file_get_contents($geocode_url);
+    $json = json_decode($contents);
+  
+    if(count($json->{'results'}) > 0) {
+      $lat = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'};
+      $long = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'};
+      
+      return $lat.','.$long;
+    }
+    else {
+      // fwrite(STDERR, "$geocode_url\n");
+      // fwrite(STDERR, "$contents\n");
+    }
+    return NULL;
   }
 
-  private function queryViewTotal($id, $metrics, $filters) {
-    $events = $this->getViewTotals($id, $metrics, $filters);
-    $rows = $events->getRows();
-    if (!empty($rows)) {
-      $this->pageviews['total'][] = ['count' => intval($rows[0][0]), 'view_id' => (string) $id];
+  private function getStreamTotals($property_id, $id, $metrics, $filters) {
+    return $this->analytics->getStreamTotals($property_id, $id, $metrics, $filters);
+  }
+
+  private function queryStreamTotal($property_id, $id, $metrics, $filters) {
+    $events = $this->getStreamTotals($property_id, $id, $metrics, $filters);
+    $totals = $events->getTotals();
+    foreach($totals as $row) {
+      $metric_values = $row->getMetricValues();
+      if(count($metric_values) > 0){
+        $count = intval($metric_values[0]->getValue());
+        $this->pageviews['total'][] = [
+          'count' => $count, 
+          'property_id' => (string) $property_id, 
+          'stream_id' => (string) $id 
+        ];
+      }
     }
   }
 
-  private function getViewAnnual($id, $metrics, $filters) {
-    return $this->analytics->getViewAnnual($id, $metrics, $filters);
+  private function getStreamAnnual($property_id, $id, $metrics, $filters) {
+    return $this->analytics->getStreamAnnual($property_id, $id, $metrics, $filters);
   }
 
-  private function getViewRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
-    return $this->analytics->getViewRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters);
+  private function getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
+    return $this->analytics->getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters);
   }
 
-  private function queryViewAnnual($id, $metrics, $filters) {
-    $events = $this->getViewAnnual($id, $metrics, $filters);
-    $rows = $events->getRows();
-    if (!empty($rows)) {
-      $this->pageviews['annual'][] = ['count' => intval($rows[0][0]), 'view_id' => (string) $id];
+  private function queryStreamAnnual($property_id, $id, $metrics, $filters) {
+    $events = $this->getStreamAnnual($property_id, $id, $metrics, $filters);
+    //fwrite(STDERR, $events->serializeToJsonString());exit;
+
+    $totals = $events->getTotals();
+    foreach($totals as $row) {
+      $metric_values = $row->getMetricValues();
+      if(count($metric_values) > 0){
+        $count = intval($metric_values[0]->getValue());
+        $this->pageviews['annual'][] = [
+          'count' => $count, 
+          'property_id' => (string) $property_id, 
+          'stream_id' => (string) $id 
+        ];
+      }
     }
   }
 
   private function getDimensions($metrics) {
     return [
-      'ga:pageviews' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:pageTitle', 
-      'ga:totalEvents' => 'ga:dateHourMinute,ga:hostname,ga:pagePath,ga:city,ga:region,ga:country,ga:eventLabel'
+      'screenPageViews' => 'dateHourMinute,hostName,unifiedPagePathScreen,city,region,country,pageTitle',
+      'eventCount' => 'dateHourMinute,hostName,unifiedPagePathScreen,city,region,country,eventName'
     ][$metrics];
   }
 
-  private function queryViewRecent($id, $start, $end, $metrics, $filters, $view_url) {
+  private function queryStreamRecent($property_id, $id, $start, $end, $metrics, $filters, $stream_url) {
     $before = count($this->pins);
     $id = (string) $id;
     $dimensions = $this->getDimensions($metrics);
 
-    $results = $this->getViewRecent(
+    $results = $this->getStreamRecent(
+      $property_id,
       $id,
       $start,
       $end,
@@ -125,15 +242,16 @@ class Harvester {
       $this->recentMaxResults,
       $filters
     );
-    $rows = (array) $results->getRows();
+    $rows = $results->getRows();
     $this->log("  Found: " . count($rows) . "\n");
     foreach ($rows as $row) {
       $row = new Row($dimensions, $metrics, $row, $this->scraper);
       $position = $row->getPosition($this->geoMap);
-      if (empty($position)) { continue; }
+
+      if (empty($position) || empty($position['lat']) || empty($position['lng'])) { continue; }
       $location = $row->getLocation();
       if (empty($location)) { continue; }
-      $metadata = $row->getMetadata($view_url);
+      $metadata = $row->getMetadata($stream_url);
       if (empty($metadata)) { continue; }
 
       $this->pins[] = [
@@ -144,28 +262,32 @@ class Harvester {
         'location' => $location,
         'position' => $position,
         'access' => $metadata['access'],
-        'view_id' => (string) $id,
+        'stream_id' => (string) $id,
       ];
     }
     $this->log("  Scraped: " . (count($this->pins) - $before) . "\n");
   }
 
-  private function queryView($view) {
-    $id = $view['id'];
-    $metrics = $view['metrics'];
-    $filters = $view['filters'];
-    $start   = isset($view['start']) ? $view['start'] : $this->recentPinsStart;
-    $end     = isset($view['end']) ? $view['end'] : $this->recentPinsEnd;
+  private function queryStream($stream) {
+    $property_id = $stream['property_id'];
+    $id = $stream['id'];
+    $metrics = $stream['metrics'];
+    $filters = $stream['filters'];
+    $start   = isset($stream['start']) ? $stream['start'] : $this->recentPinsStart;
+    $end     = isset($stream['end']) ? $stream['end'] : $this->recentPinsEnd;
 
-    $view_url = isset($view['view_url']) ? $view['view_url'] : '';
-    if (is_array($metrics)) { $metrics = implode($metrics, ','); }
-    if (is_array($filters)) { $filters = implode($filters, ','); }
-    $this->queryViewTotal($id, $metrics, $filters);
-    $this->queryViewAnnual($id, $metrics, $filters);
-    $this->queryViewRecent($id, $start, $end, $metrics, $filters, $view_url);
+    //fwrite(STDERR, "Property ID: $property_id\nStart: $start\nEnd: $end");
+
+    $stream_url = isset($stream['stream_url']) ? $stream['stream_url'] : '';
+    if (is_array($metrics)) { $metrics = implode(',', $metrics); }
+    if (is_array($filters)) { $filters = implode(',', $filters); }
+
+    $this->queryStreamTotal($property_id, $id, $metrics, $filters);
+    $this->queryStreamAnnual($property_id, $id, $metrics, $filters);
+    $this->queryStreamRecent($property_id, $id, $start, $end, $metrics, $filters, $stream_url);
   }
 
-  private function getViews() {
-    return $this->config->getViews();
+  private function getStreams() {
+    return $this->config->getStreams();
   }
 }

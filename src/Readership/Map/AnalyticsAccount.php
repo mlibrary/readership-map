@@ -4,19 +4,26 @@ namespace Readership\Map;
 class AnalyticsAccount {
   private $applicationName = 'Michigan Publishing Readership Map';
   private $scopes = [ 'https://www.googleapis.com/auth/analytics.readonly' ];
-  private $views;
+  private $streams;
   private $accountInfo;
-  private $driver;
+  private GoogleClientDriver $driver;
   
   public function __construct($driver = 'Readership\Map\GoogleClientDriver') {
     $this->driver = new $driver($this->applicationName, $this->scopes);
-    $this->views = $this->driver->getViews();
+    $this->streams = $this->driver->getStreams();
     $this->accountInfo = $this->driver->getAccountInfo();
   }
 
-  public function getViewRecent($id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
+  public function testStream() {
+    $retVal = $this->driver->queryTest();
+    
+    return $retVal;
+  }
+
+  public function getStreamRecent($property_id, $id, $start, $end, $metrics, $dimensions, $max_results, $filters) {
     return $this->driver->query(
-      'ga:' . $id,
+      $property_id,
+      $id,
       $start,
       $end,
       $metrics,
@@ -24,46 +31,55 @@ class AnalyticsAccount {
         'dimensions' => $dimensions,
         'max-results' => $max_results,
         'filters' => $filters,
-        'sort' => 'ga:dateHourMinute',
+        'sort' => 'dateHourMinute',
       ]
     );
   }
 
-  public function getViewAnnual($id, $metrics, $filters) {
+  public function getStreamAnnual($property_id, $id, $metrics, $filters) {
     return $this->driver->query(
-      'ga:' . $id,
+      $property_id,
+      $id,
       '365daysAgo',
       'today',
       $metrics,
-      [ 'filters' => $filters ]
+      [ 
+        'filters' => $filters,
+        'dimensions' => 'unifiedPagePathScreen'
+      ]
     );
   }
 
-  public function getViewTotals($id, $metrics, $filters) {
+  public function getStreamTotals($property_id, $id, $metrics, $filters) {
     return $this->driver->query(
-      'ga:' . $id,
-      '2005-01-01',
+      $property_id,
+      $id,
+      '2015-08-14',
       'today',
       $metrics,
-      [ 'filters' => $filters ]
+      [ 
+        'filters' => $filters,
+        'dimensions' => 'unifiedPagePathScreen'
+      ]
     );
   }
 
-  public function getGeoData($id, $index) {
+  public function getGeoData($property_id, $id, $index) {
     return $this->driver->query(
-      'ga:' . $id,
+      $property_id,
+      $id,
       '7daysAgo',
       'today',
-      'ga:pageviews',
+      'screenPageViews',
       [
-        'dimensions' => 'ga:city,ga:region,ga:country,ga:latitude,ga:longitude',
+        'dimensions' => 'city,region,country',
         'start-index' => $index,
       ]
     );
   }
 
-  public function getViews() {
-    return $this->views;
+  public function getStreams() {
+    return $this->streams;
   }
 
   public function getAccountInfo() {

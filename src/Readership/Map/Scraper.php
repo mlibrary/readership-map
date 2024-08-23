@@ -30,7 +30,6 @@ class Scraper {
     }
 
     if (isset($this->urls[$url])) {
-      $this->log("  Cached results: $url\n");
       return $this->urls[$url];
     }
 
@@ -38,11 +37,12 @@ class Scraper {
       return $this->urls[$url] = NULL;
     }
 
-    $options = ['http' => ['user_agent' => 'Readership Map Metadata Scraper']];
+    $options = ['http' => ['user_agent' => 'Readership Map Metadata Scraper Bot']];
     $context = stream_context_create($options);
     $html = @file_get_contents($url, FALSE, $context);
     if (empty($html)) {
-      $this->log("  Scrape failed: $url empty / {$http_response_header[0]}\n");
+      $reason = !empty($htp_response_header) && count($http_response_header) > 0 ? $http_response_header[0] : '';
+      $this->log("  Scrape failed: $url empty / $reason\n");
       return $this->urls[$url] = NULL;
     }
     return $this->urls[$url] = $this->scrapeHTML($html, $url);
@@ -58,8 +58,6 @@ class Scraper {
       ['citation_author'],
       ['citation_doi', 'DC.Identifier', 'citation_hdl']
     ];
-
-    $this->log("Parsing meta_tags\n");
 
     foreach ($meta_tags as $tag_list) {
       $value = NULL;
@@ -77,7 +75,6 @@ class Scraper {
         $ret[] = '';
       }
     }
-    $this->log("Finished parsing meta_tags\n");
 
     if (strpos($ret[2], 'doi:') === 0) {
       $ret[2] = 'https://doi.org/' . substr($ret[2], 4, strlen($ret[2]));
@@ -88,7 +85,6 @@ class Scraper {
     } else {
       $ret[2] = $url;
     }
-    $this->log("Checking OA status\n");
 
     $content = qp($qp, "img[@alt='Open Access']");
     if ($content->length > 0) {
@@ -100,7 +96,7 @@ class Scraper {
     if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
       $ret = $this->scrapeCoins($qp);
       if (empty($ret[0]) || empty($ret[1]) || empty($ret[2])) {
-        $this->log("  Scrape failed: $url unable to find metadata\n");
+        //$this->log("  Scrape failed: $url unable to find metadata\n");
         return NULL;
       }
     }
@@ -122,8 +118,11 @@ class Scraper {
     }
     $pairs = [];
     foreach (explode('&', $content) as $pair) {
-      list($key, $val) = explode('=', $pair, 2);
-      $pairs[$key] = urldecode($val);
+      $keyvalue = explode('=', $pair, 2);
+      if(count($keyvalue) == 2){
+        list($key, $val) = $keyvalue;
+        $pairs[$key] = urldecode($val);
+      }
     }
     return [
       isset($pairs['rft.title']) ? $pairs['rft.title'] : NULL,

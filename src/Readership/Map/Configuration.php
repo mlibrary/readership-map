@@ -1,12 +1,13 @@
 <?php
 namespace Readership\Map;
 
+use Google\Analytics\Data\V1beta\DateRange;
 use Symfony\Component\Yaml\Yaml;
 
 class Configuration {
   private $config;
 
-  private $viewUrls = [];
+  private $streamUrls = [];
 
   public function __construct($yaml_file = 'config.yml') {
     $this->config = Yaml::parsefile($yaml_file);
@@ -28,31 +29,31 @@ class Configuration {
     return $this->formatDate($this->config['end']);
   }
   
-  public function addViews($views) {
-    // Capture all of the view_id => view_url, start and end associations.
-    $viewMetadata = [ 'view_url' => [], 'start' => [], 'end' => [] ];
-    foreach (array_keys($viewMetadata) as $meta) {
-      foreach ((array) $views as $view) {
-        if (isset($view[$meta])) {
-          $viewMetadata[$meta][$view['id']] = $view[$meta];
+  public function addStreams($streams) {
+    // Capture all of the stream_id => stream_url, start and end associations.
+    $streamMetadata = [ 'stream_url' => [], 'start' => [], 'end' => [] ];
+    foreach (array_keys($streamMetadata) as $meta) {
+      foreach ((array) $streams as $stream) {
+        if (isset($stream[$meta])) {
+          $streamMetadata[$meta][$stream['id']] = $stream[$meta];
         }
       }
-      foreach ((array) $this->config['views'] as $i => $view) {
-        if (isset($view['id']) && empty($view[$meta]) && isset($viewMetadata[$meta][$view['id']])) {
-          $this->config['views'][$i][$meta] = $viewMetadata[$meta][$view['id']];
+      foreach ((array) $this->config['streams'] as $i => $stream) {
+        if (isset($stream['id']) && empty($stream[$meta]) && isset($streamMetadata[$meta][$stream['id']])) {
+          $this->config['streams'][$i][$meta] = $streamMetadata[$meta][$stream['id']];
         }
       }
     }
 
-    // Only import views from accounts we have defined metrics and filters for the account.
-    foreach ((array) $views as $view) {
-      $accountId = $view['account_id'];
+    // Only import streams from accounts we have defined metrics and filters for the account.
+    foreach ((array) $streams as $stream) {
+      $accountId = $stream['account_id'];
 
       if (empty($accountId)) { continue; }
 
       foreach ((array) $this->config['accounts'] as $account) {
         if ($account['id'] != $accountId) { continue; }
-        $candidate = $view + [
+        $candidate = $stream + [
           'metrics' => $account['metrics'],
           'filters' => $account['filters'],
         ];
@@ -62,18 +63,19 @@ class Configuration {
         if (isset($account['end'])) {
           $candidate['end'] = $account['end'];
         }
-        $this->config['views'][] = $candidate;
+        $this->config['streams'][] = $candidate;
       }
     }
   }
 
   private function cleanConfig() {
-    // Ensure that view id's are handled like strings.
-    foreach ((array) $this->config['views'] as $i => $view) {
-      $this->config['views'][$i]['id'] = (string) $view['id'];
+    // Ensure that stream id's are handled like strings.
+    foreach ((array) $this->config['streams'] as $i => $stream) {
+      $this->config['streams'][$i]['id'] = (string) $stream['id'];
+      $this->config['streams'][$i]['property_id'] = (string) $stream['property_id'];
       foreach (['start', 'end'] as $date) {
-        if (isset($view[$date])) {
-          $this->config['views'][$i][$date] = $this->formatDate($view[$date]);
+        if (isset($stream[$date])) {
+          $this->config['streams'][$i][$date] = $this->formatDate($stream[$date]);
         }
       }
     }
@@ -87,7 +89,7 @@ class Configuration {
     }
   }
 
-  public function getViews() {
-    return $this->config['views'];
+  public function getStreams() {
+    return $this->config['streams'];
   }
 }

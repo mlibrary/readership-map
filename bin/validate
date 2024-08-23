@@ -1,4 +1,4 @@
-#!/usr/bin/env php7.3
+#!/usr/bin/env php
 <?php
 namespace Readership\Map;
 

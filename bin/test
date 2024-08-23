@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+namespace Readership\Map;
+
+require_once __DIR__ . '/../src/autoload.php';
+ini_set('log_errors_max_len', 0);
+error_reporting(E_ALL ^ E_DEPRECATED);
+
+$driver = new GoogleClientDriver('Michigan Publishing Readership Map', [ 'https://www.googleapis.com/auth/analytics.readonly' ]);
+
+$results = $driver->queryTest();
+
+fwrite(STDERR, $results->serializeToJsonString());

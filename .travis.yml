@@ -1,7 +1,7 @@
 ---
 language: php
 php:
-  - 7.3
+  - 8.1
 install: composer install
 script: vendor/bin/phpunit
 after_success:
