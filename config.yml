@@ -52,7 +52,7 @@ accounts:
 #  #MPub quod.lib colls, part 1
   - id: 10966839
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~(seq=|view=text|view=fulltext|view=pdf)
+    filters: unifiedPagePathScreen=~(seq=|view=text|view=fulltext|view=pdf)
   - id: 10966839
     metrics: eventCount
     filters: eventName=~Item View
@@ -62,7 +62,7 @@ accounts:
 #  #MPub quod.lib colls, part 2
   - id: 35132797
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~(seq=|view=text|view=fulltext|view=pdf)
+    filters: unifiedPagePathScreen=~(seq=|view=text|view=fulltext|view=pdf)
   - id: 35132797
     metrics: eventCount
     filters: eventName=~Item View
@@ -74,7 +74,7 @@ streams:
   - id: 4423931303
     property_id: 349453822
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
   - id: 4423931303
     property_id: 349453822
     metrics: eventCount
@@ -83,7 +83,7 @@ streams:
   - id: 4561158127
     property_id: 352199879
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
   - id: 4561158127
     property_id: 352199879
     metrics: eventCount
@@ -92,7 +92,7 @@ streams:
   - id: 4755115906
     property_id: 359173256
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
   - id: 4755115906
     property_id: 359173256
     metrics: eventCount
@@ -101,7 +101,7 @@ streams:
   - id: 4644734036
     property_id: 354564446
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
@@ -122,7 +122,7 @@ streams:
   - id: 4564902159
     property_id: 352228685
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
@@ -143,7 +143,7 @@ streams:
   - id: 4557309451
     property_id: 352204545
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
@@ -164,7 +164,7 @@ streams:
   - id: 4563416143
     property_id: 352224564
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
@@ -185,7 +185,7 @@ streams:
   - id: 4563052339
     property_id: 352219711
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
@@ -206,7 +206,7 @@ streams:
   - id: 4562158441
     property_id: 352224972
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
@@ -227,7 +227,7 @@ streams:
   - id: 4563195478
     property_id: 352197853
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
@@ -248,7 +248,7 @@ streams:
   - id: 4563043826
     property_id: 352228770
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~^/(concern/.+?|epubs)/([A-Za-z0-9])
+    filters: unifiedPagePathScreen=~^/(concern/.+?|epubs)/([A-Za-z0-9])
     start:
       datefmt: Y-m-d
       date: -4 weeks
@@ -273,12 +273,12 @@ streams:
   - id: 5155884408
     property_id: 373818812
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~data/downloads
+    filters: unifiedPagePathScreen=~data/downloads
   # Deep Blue Docs
   - id: 5155884408
     property_id: 373818812
     metrics: screenPageViews
-    filters: pagePathPlusQueryString=~bitstream
+    filters: unifiedPagePathScreen=~bitstream
   - id: 5155884408
     property_id: 373818812
     metrics: eventCount
