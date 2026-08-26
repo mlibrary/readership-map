@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: readership-map-runtime
+  namespace: readership-map
+spec:
+  # ReadWriteMany allows multiple web pods and the CronJob pod to share the volume.
+  # NOTE: RWX support depends on your cluster's storage class (e.g. NFS, CephFS, EFS).
+  # If your storage class only supports ReadWriteOnce, change to ReadWriteOnce and
+  # ensure only one replica writes at a time (e.g. use a single-replica Deployment
+  # or an init-container to pre-populate pins.json).
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi

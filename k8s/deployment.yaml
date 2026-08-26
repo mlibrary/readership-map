@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: readership-map-web
+  namespace: readership-map
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: readership-map-web
+  template:
+    metadata:
+      labels:
+        app: readership-map-web
+    spec:
+      containers:
+        - name: web
+          # REPLACE_ME: update image tag after each build (e.g. sha-<git-sha>)
+          image: ghcr.io/mlibrary/readership-map:sha-REPLACE_ME
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: readership-map-config
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/run/secrets/google/credentials.json
+          volumeMounts:
+            - name: runtime
+              mountPath: /var/www/html/runtime
+            - name: google-creds
+              mountPath: /var/run/secrets/google
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+      volumes:
+        - name: runtime
+          persistentVolumeClaim:
+            claimName: readership-map-runtime
+        - name: google-creds
+          secret:
+            secretName: readership-map-google-creds

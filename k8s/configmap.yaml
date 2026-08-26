@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: readership-map-config
+  namespace: readership-map
+data:
+  # Path where pins.json is written by the CronJob and read by the web app
+  PINS_FILE: /var/www/html/runtime/pins.json
+  TZ: UTC
