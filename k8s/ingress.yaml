@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: readership-map
+  namespace: readership-map
+  # REPLACE_ME: adjust annotations to match your cluster's ingress controller
+  # annotations:
+  #   kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    # REPLACE_ME: replace with your actual hostname
+    - host: readership-map.example.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: readership-map-web
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        # REPLACE_ME: replace with your actual hostname
+        - readership-map.example.org
+      # REPLACE_ME: replace with your TLS secret name
+      secretName: readership-map-tls

@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: readership-map-refresh
+  namespace: readership-map
+spec:
+  # Regenerate pins.json every 15 minutes; tune as needed
+  schedule: "*/15 * * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: refresh
+              # REPLACE_ME: keep in sync with deployment.yaml image tag
+              image: ghcr.io/mlibrary/readership-map:sha-REPLACE_ME
+              command: ["/bin/bash", "/var/www/html/bin/generate-pins.sh"]
+              envFrom:
+                - configMapRef:
+                    name: readership-map-config
+              env:
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: /var/run/secrets/google/credentials.json
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "256Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "512Mi"
+              volumeMounts:
+                - name: runtime
+                  mountPath: /var/www/html/runtime
+                - name: google-creds
+                  mountPath: /var/run/secrets/google
+                  readOnly: true
+          volumes:
+            - name: runtime
+              persistentVolumeClaim:
+                claimName: readership-map-runtime
+            - name: google-creds
+              secret:
+                secretName: readership-map-google-creds

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: readership-map-web
+  namespace: readership-map
+spec:
+  selector:
+    app: readership-map-web
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
